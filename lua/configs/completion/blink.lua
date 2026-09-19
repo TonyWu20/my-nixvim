@@ -17,7 +17,11 @@ local source_labels = {
 ---@module 'blink.cmp'
 ---@type blink.cmp.Config
 local opts = {
-	snippets = { preset = "luasnip" },
+	-- Built-in engine: no luasnip/cmp_luasnip dependency. Snippet content
+	-- comes from <config>/snippets or a friendly-snippets collection on the
+	-- runtime path (auto-detected). Swap to preset = "luasnip" if you add
+	-- the LuaSnip + cmp_luasnip plugins back.
+	snippets = { preset = "default" },
 	cmdline = {
 		enabled = true,
 		sources = function()
