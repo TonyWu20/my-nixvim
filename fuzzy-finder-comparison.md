@@ -1,5 +1,9 @@
 # Fuzzy finder: `tv.nvim` (television) vs `telescope.nvim`
 
+**Decision (2026-09-19): keep `telescope.nvim`.**
+`tv.nvim` is dropped from the new config.
+The minimal telescope set for ff/fp is recorded in `plugin-selection.md`.
+
 Decision aid for picking the fuzzy finder for the new minimal config.
 Your current nvimdots setup uses **telescope** heavily.
 See `lua/modules/configs/tool/telescope.lua` and `lua/keymap/tool.lua`.

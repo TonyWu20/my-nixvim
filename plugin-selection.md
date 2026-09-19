@@ -5,8 +5,9 @@ Source: `lua/modules/plugins/{completion,editor,lang,tool,ui}.lua` in `~/nvimdot
 They are not part of this checklist.
 
 Legend:
+
 - [x] = you already decided to keep (from your "want to keep" list) or you have it disabled in
-`lua/user/settings.lua` `disabled_plugins` today.
+      `lua/user/settings.lua` `disabled_plugins` today.
 - [ ] = your decision.
 
 Your current `disabled_plugins` in `lua/user/settings.lua`:
@@ -21,90 +22,98 @@ So both AI-prediction branches (minuet, copilot) and the fzf backend are off for
 The core LSP trio you want to keep:
 
 - [x] `neovim/nvim-lspconfig` — LSP client configs (your item 5).
-- [x] `mason-org/mason.nvim` — package manager that *installs* LSP servers (your "installation?" part).
+- [x] `mason-org/mason.nvim` — package manager that _installs_ LSP servers (your "installation?" part).
 - [x] `mason-org/mason-lspconfig.nvim` — bridges Mason and LSP. nvimdots uses it to auto-install
-  servers listed in `settings.lsp_deps` / `null_ls_deps` / `dap_deps` / `treesitter_deps`.
+      servers listed in `settings.lsp_deps` / `null_ls_deps` / `dap_deps` / `treesitter_deps`.
 - [ ] `folke/neoconf.nvim` — one-shot LSP config generator (`NeoconfCreate`). Convenience only.
-- [ ] `nvimdev/lspsaga.nvim` — LSP UI: code actions menu, code lens, diagnostic flythrough.
+- [] `nvimdev/lspsaga.nvim` — LSP UI: code actions menu, code lens, diagnostic flythrough.
 - [ ] `rachartier/tiny-inline-diagnostic.nvim` — inline diagnostic icons in the code.
 - [ ] `joechrisellis/lsp-format-modifications.nvim` — LSP format only the lines you changed on save.
-- [ ] `nvimtools/none-ls.nvim` (+ `jay-babu/mason-null-ls.nvim`) — run external formatters
-  (clang_format, prettier, shfmt, stylua, vint…) as LSP.
-- [ ] `saghen/blink.cmp` — autocompletion engine.
+- [x] `nvimtools/none-ls.nvim` (+ `jay-babu/mason-null-ls.nvim`) — run external formatters
+      (clang_format, prettier, shfmt, stylua, vint…) as LSP.
+- [x] `saghen/blink.cmp` — autocompletion engine.
 - [ ] `L3MON4D3/LuaSnip` (+ `rafamadriz/friendly-snippets`) — snippet engine + snippet pack.
 - [ ] `f3fora/cmp-spell` — spell-based completion source.
-- [ ] `kdheepak/cmp-latex-symbols` — LaTeX symbols in completion (only matters for LaTeX).
-- [ ] `mikavilpas/blink-ripgrep.nvim` — ripgrep-backed source for blink.
-- [ ] `xzbdmw/colorful-menu.nvim` — colored completion menu.
+- [x] `kdheepak/cmp-latex-symbols` — LaTeX symbols in completion (only matters for LaTeX).
+- [x] `mikavilpas/blink-ripgrep.nvim` — ripgrep-backed source for blink.
+- [x] `xzbdmw/colorful-menu.nvim` — colored completion menu.
 - [ ] `andersevenrud/cmp-tmux` — tmux window content as completion source. You have it disabled.
 - [ ] `milanglacier/minuet-ai.nvim` — AI edit prediction (OpenAI-compatible). Currently off for you.
 - [ ] `fang2hou/blink-copilot` + `zbirenbaum/copilot.lua` — GitHub Copilot prediction. Currently off for you.
-- [ ] `folke/lazydev.nvim` — LSP + completion for your own Lua files (your config itself).
+- [x] `folke/lazydev.nvim` — LSP + completion for your own Lua files (your config itself).
 
 ## editor.lua — editing behavior
 
 - [ ] `olimorris/persisted.nvim` — session persistence (`:SessionToggle` etc.).
-- [ ] `m4xshen/autoclose.nvim` — auto-close brackets/quotes/strings.
-- [ ] `pteroctopus/faster.nvim` — fast-load mode for big files. On by default. Your settings do not override it.
-- [ ] `ojroques/nvim-bufdel` — smarter buffer deletion (`:BufDel` etc.).
-- [ ] `folke/flash.nvim` — character/word jump (partial replacement of hop/wilder/treehopper).
-- [ ] `numToStr/Comment.nvim` — `gc`-style comment toggling.
+- [x] `m4xshen/autoclose.nvim` — auto-close brackets/quotes/strings.
+- [x] `pteroctopus/faster.nvim` — fast-load mode for big files. On by default. Your settings do not override it.
+- [x] `ojroques/nvim-bufdel` — smarter buffer deletion (`:BufDel` etc.).
+- [x] `folke/flash.nvim` — character/word jump (partial replacement of hop/wilder/treehopper).
+- [x] `numToStr/Comment.nvim` — `gc`-style comment toggling.
 - [ ] `sindrets/diffview.nvim` — git diff UI.
-- [ ] `echasnovski/mini.align` — `gv` block aligning.
-- [ ] `echasnovski/mini.cursorword` — highlight word under cursor.
+- [] `echasnovski/mini.align` — `gv` block aligning.
+- [x] `echasnovski/mini.cursorword` — highlight word under cursor.
 - [ ] `smoka7/hop.nvim` — two-key word jump. You have it disabled. flash.nvim overlaps.
 - [ ] `brenoprata10/nvim-highlight-colors` — hex color highlight under cursor.
 - [ ] `romainl/vim-cool` — auto-indent / auto-shift.
-- [ ] `lambdalisue/suda.vim` — `:SudaRead` / `:SudaWrite` (sudo edit).
+- [x] `lambdalisue/suda.vim` — `:SudaRead` / `:SudaWrite` (sudo edit).
 - [ ] `tpope/vim-sleuth` — auto-detect indent/tab options per filetype.
 - [ ] `MagicDuck/grug-far.nvim` — file browser with git ops (alternate to telescope finders).
 
 ### Tree-sitter add-ons (core `nvim-treesitter/nvim-treesitter` is your item 4 — kept)
 
 - [x] `nvim-treesitter/nvim-treesitter` — highlighting/parsing core.
-- [ ] `nvim-treesitter/nvim-treesitter-textobjects` — TS-aware `aw`, `af`, … textobjects.
-- [ ] `mfussenegger/nvim-treehopper` — TS-aware `c`/`o`/`a` jumping between nodes.
-- [ ] `andymass/vim-matchup` — smarter `%` matching (also disables built-in matchit/matchparen).
-- [ ] `windwp/nvim-ts-autotag` — auto-close tags in markup files.
-- [ ] `hiphish/rainbow-delimiters.nvim` — rainbow parens.
-- [ ] `nvim-treesitter/nvim-treesitter-context` — show current function/scope above cursor.
+- [x] `nvim-treesitter/nvim-treesitter-textobjects` — TS-aware `aw`, `af`, … textobjects.
+- [x] `mfussenegger/nvim-treehopper` — TS-aware `c`/`o`/`a` jumping between nodes.
+- [x] `andymass/vim-matchup` — smarter `%` matching (also disables built-in matchit/matchparen).
+- [x] `windwp/nvim-ts-autotag` — auto-close tags in markup files.
+- [x] `hiphish/rainbow-delimiters.nvim` — rainbow parens.
+- [x] `nvim-treesitter/nvim-treesitter-context` — show current function/scope above cursor.
 - [ ] `JoosepAlviste/nvim-ts-context-commentstring` — TS-based `--` commentstring.
 
 ## lang.lua — language packs
 
 - [ ] `kevinhwang91/nvim-bqf` (+ `junegunn/fzf`) — quickfix UI with filters.
 - [ ] `ray-x/go.nvim` (+ `ray-x/guihua.lua`) — Go tooling. You have it disabled.
-- [ ] `mrcjkb/rustaceanvim` — Rust tooling.
+- [x] `mrcjkb/rustaceanvim` — Rust tooling.
 - [ ] `Saecki/crates.nvim` — Cargo crate explorer (`:Cargo`).
-- [ ] `MeanderingProgrammer/render-markdown.nvim` — render markdown/CodeCompanion output.
+- [x] `MeanderingProgrammer/render-markdown.nvim` — render markdown/CodeCompanion output.
 - [ ] `iamcco/markdown-preview.nvim` — markdown preview.
 - [ ] `chrisbra/csv.vim` — CSV editing.
 
 ## tool.lua — git, terminal, search, debugging
 
-- [ ] `tpope/vim-fugitive` — git from Vim.
+- [x] `tpope/vim-fugitive` — git from Vim.
 - [ ] `Bekaboo/dropbar.nvim` — dropbar file explorer (needs telescope deps + fzf-native).
-- [ ] `nvim-tree/nvim-tree.lua` — sidebar file tree.
-- [ ] `ibhagwan/smartyank.nvim` — auto-copy yanked text to system clipboard.
+- [x] `nvim-tree/nvim-tree.lua` — sidebar file tree.
+- [x] `ibhagwan/smartyank.nvim` — auto-copy yanked text to system clipboard.
 - [ ] `michaelb/sniprun` — run selected code in a shell. You have it disabled.
 - [ ] `akinsho/toggleterm.nvim` — persistent named terminals.
-- [ ] `folke/trouble.nvim` — diagnostics/locations list UI.
-- [ ] `folke/which-key.nvim` — keybinding cheat sheet on prefix.
+- [] `folke/trouble.nvim` — diagnostics/locations list UI.
+- [x] `folke/which-key.nvim` — keybinding cheat sheet on prefix.
 - [ ] `olimorris/codecompanion.nvim` (+ `ravitemer/codecompanion-history.nvim`) — AI chat.
-  Off for you (`use_chat=false`).
+      Off for you (`use_chat=false`).
 - [ ] `ibhagwan/fzf-lua` — fzf-based search backend. Off for you (`search_backend=telescope`).
 
-### Fuzzy finder (your item 3 — core kept)
+### Fuzzy finder (your item 3 — kept)
+
+Decision (2026-09-19): keep telescope, drop `tv.nvim` (see `fuzzy-finder-comparison.md`).
+
+Your ff/fp keymaps run through the `ayamir/search.nvim` module.
+Option A keeps that tabbed UX and needs `search.nvim` + `frecency` + `live-grep-args`.
+Option B is more minimal: rebind ff to `find_files` and fp to `live_grep_args`.
+Drop `search.nvim` and the Frecency tab.
+The boxes below reflect Option A.
 
 - [x] `nvim-telescope/telescope.nvim` — fuzzy finder core.
-- [ ] `nvim-telescope/telescope-fzf-native.nvim` — fuzz-algorithm speedup.
-- [ ] `nvim-telescope/telescope-frecency.nvim` — frecency (recent+frequency) results.
-- [ ] `nvim-telescope/telescope-live-grep-args.nvim` — live-grep with flags.
-- [ ] `jvgrootveld/telescope-zoxide` — zoxide directory jumps.
-- [ ] `debugloop/telescope-undo.nvim` — search in the undo tree.
-- [ ] `ayamir/search.nvim` — integrated search module.
-- [ ] `DrKJeff16/project.nvim` — project detection (feeds other pickers).
-- [ ] `aaronhallaert/advanced-git-search.nvim` (+ `tpope/vim-rhubarb`) — git history/search pickers.
+- [ ] `nvim-telescope/telescope-fzf-native.nvim` — dropped. The new config does not load the fzf extension.
+- [x] `nvim-telescope/telescope-frecency.nvim` — Frecency tab in the file collection. Option A only.
+- [x] `nvim-telescope/telescope-live-grep-args.nvim` — "Word in project" in the pattern collection. Needed by both options.
+- [ ] `jvgrootveld/telescope-zoxide` — dropped (the dossier collection is dropped).
+- [ ] `debugloop/telescope-undo.nvim` — dropped (the misc collection is dropped).
+- [x] `ayamir/search.nvim` — implements the ff/fp keymaps. Option A only.
+- [ ] `DrKJeff16/project.nvim` — dropped (the dossier collection is dropped).
+- [ ] `aaronhallaert/advanced-git-search.nvim` (+ `tpope/vim-rhubarb`) — dropped (the git collection is dropped).
 
 ### Debugging
 
@@ -114,18 +123,18 @@ The core LSP trio you want to keep:
 
 - [x] `goolord/alpha-nvim` — splash screen (your item 1).
 - [x] `Jint-lzxy/nvim` (branch `refactor/syntax-highlighting`, name `catppuccin`) —
-  catppuccin-macchiato theme (your item 2).
-- [ ] `akinsho/bufferline.nvim` — buffer tabs.
-- [ ] `lewis6991/gitsigns.nvim` — git signs in the gutter.
-- [ ] `lukas-reineke/indent-blankline.nvim` — indentation guides.
-- [ ] `nvim-lualine/lualine.nvim` — statusline.
-- [ ] `karb94/neoscroll.nvim` — smooth scrolling.
+      catppuccin-macchiato theme (your item 2).
+- [x] `akinsho/bufferline.nvim` — buffer tabs.
+- [x] `lewis6991/gitsigns.nvim` — git signs in the gutter.
+- [x] `lukas-reineke/indent-blankline.nvim` — indentation guides.
+- [x] `nvim-lualine/lualine.nvim` — statusline.
+- [x] `karb94/neoscroll.nvim` — smooth scrolling.
 - [ ] `rcarriga/nvim-notify` — notification toasts.
 - [ ] `folke/paint.nvim` — `<leader>pp` palette picker.
 - [ ] `mrjones2014/smart-splits.nvim` — open splits in the last-used direction.
 - [ ] `folke/edgy.nvim` — edge windows (statusline/indent).
 - [ ] `folke/todo-comments.nvim` (+ `nvim-lua/plenary.nvim`) — `-- TODO` collection.
-- [ ] `dstein64/nvim-scrollview` — scrollbar with minimap.
+- [x] `dstein64/nvim-scrollview` — scrollbar with minimap.
 
 ## Transitive dependencies (pulled in automatically, no config of their own)
 
