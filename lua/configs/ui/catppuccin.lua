@@ -1,5 +1,6 @@
 return function()
-	local transparent_background = vim.g.my_settings.transparent_background
+	local settings = vim.g.my_settings
+	local transparent_background = settings.transparent_background
 
 	require("utils").load_plugin("catppuccin", {
 		background = { light = "latte", dark = "mocha" },
@@ -93,4 +94,11 @@ return function()
 			end,
 		},
 	})
+
+	-- Apply the configured flavor. setup() only compiles the palette.
+	local cs = settings.colorscheme or "catppuccin"
+	local ok, err = pcall(vim.cmd.colorscheme, cs)
+	if not ok then
+		vim.notify("catppuccin: cannot apply " .. cs, vim.log.levels.WARN)
+	end
 end
