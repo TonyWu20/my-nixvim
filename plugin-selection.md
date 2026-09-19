@@ -35,6 +35,9 @@ The core LSP trio you want to keep:
 - [ ] `L3MON4D3/LuaSnip` (+ `rafamadriz/friendly-snippets`) — snippet engine + snippet pack.
 - [ ] `f3fora/cmp-spell` — spell-based completion source.
 - [x] `kdheepak/cmp-latex-symbols` — LaTeX symbols in completion (only matters for LaTeX).
+      Kept as a native blink source, not a plugin. The symbol data is vendored in
+      `lua/completion/latex_symbols_data.lua` and served by `lua/configs/completion/latex_symbols.lua`.
+      This avoids the nvim-cmp dependency and the `after/plugin` `require("cmp")` error.
 - [x] `mikavilpas/blink-ripgrep.nvim` — ripgrep-backed source for blink.
 - [x] `xzbdmw/colorful-menu.nvim` — colored completion menu.
 - [ ] `andersevenrud/cmp-tmux` — tmux window content as completion source. You have it disabled.
