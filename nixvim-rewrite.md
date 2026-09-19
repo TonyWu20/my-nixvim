@@ -36,17 +36,26 @@ This rewrites the repo to configure Neovim through the nixvim Nix module system.
   `mini-surround`, `focus-nvim`, `lean-nvim`). Two have no nixpkgs package,
   so they are built from pinned source (`search.nvim`, `nvim-treehopper`).
 
-## Deliberate simplifications (nixvim defaults)
+## Simplifications and preserved behavior
 
-Where the old config had heavy bespoke Lua, nixvim ships curated defaults.
-The rewrite uses those instead of translating every line:
+Where the old config had bespoke Lua that maps cleanly onto nixvim defaults,
+the rewrite uses the defaults instead of translating every line:
 
-- **alpha**: nixvim default splash. The old ASCII art and two buttons are dropped.
 - **lualine**: nixvim default statusline. The custom components are dropped.
-- **bufferline, indent-blankline, gitsigns**: nixvim defaults. The hand-rolled
-  catppuccin overrides and IBL scope node lists are dropped.
-- **lazy.nvim UI keymaps** (`<leader>ph` to `<leader>px`): dropped.
-  nixvim does not use lazy.nvim, so there is no `:Lazy` UI.
+- **indent-blankline**: nixvim default. The hand-rolled scope node lists are
+  dropped.
+- **lazy.nvim UI keymaps** (`<leader>ph` to `<leader>px`): dropped. nixvim
+  uses lz-n, so there is no `:Lazy` UI.
+
+Bespoke behavior that is preserved and ported to Nix:
+
+- **alpha**: the old ASCII art and the two search buttons. The buttons now
+  call `require('search').open` on the `file` and `pattern` collections.
+- **gitsigns**: the buffer-scoped hunk keymaps live in `settings.on_attach`.
+- **bufferline**: the `always_show_bufferline`, close/right-click `BufDel`,
+  and LSP diagnostics options are kept.
+- **catppuccin**: the custom highlight overrides are kept via
+  `settings.custom_highlights`.
 
 Everything else is ported to Nix. That covers the editing keymaps, the suda,
 tree, bufdel, and bufferline maps, plus the telescope maps. It also covers all
