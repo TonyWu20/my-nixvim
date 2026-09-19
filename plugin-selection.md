@@ -98,12 +98,12 @@ The core LSP trio you want to keep:
 ### Fuzzy finder (your item 3 — kept)
 
 Decision (2026-09-19): keep telescope, drop `tv.nvim` (see `fuzzy-finder-comparison.md`).
+Option A confirmed: tabbed `search.nvim` UX.
 
 Your ff/fp keymaps run through the `ayamir/search.nvim` module.
-Option A keeps that tabbed UX and needs `search.nvim` + `frecency` + `live-grep-args`.
-Option B is more minimal: rebind ff to `find_files` and fp to `live_grep_args`.
-Drop `search.nvim` and the Frecency tab.
-The boxes below reflect Option A.
+Option A keeps that tabbed UX. It needs `search.nvim` + `frecency` + `live-grep-args`.
+Option B rebinds ff to `find_files` and fp to `live_grep_args`, dropping `search.nvim`.
+Option A is chosen (confirmed 2026-09-19). The boxes below match it.
 
 - [x] `nvim-telescope/telescope.nvim` — fuzzy finder core.
 - [ ] `nvim-telescope/telescope-fzf-native.nvim` — dropped. The new config does not load the fzf extension.
