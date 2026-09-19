@@ -52,28 +52,26 @@ function M.setup()
 		end
 	end
 
-	local function setup_lsp_for_package(pkg)
-		local mappings = mason_lspconfig.get_mappings().package_to_lspconfig
-		if not mappings or vim.tbl_isempty(mappings) then
-			mappings = {}
-			for _, spec in ipairs(mason_registry.get_all_package_specs()) do
-				local lspconfig = vim.tbl_get(spec, "neovim", "lspconfig")
-				if lspconfig then
-					mappings[spec.name] = lspconfig
-				end
+	-- Build the mason-package -> lspconfig-name mapping once.
+	local mappings = mason_lspconfig.get_mappings().package_to_lspconfig
+	if not mappings or vim.tbl_isempty(mappings) then
+		mappings = {}
+		for _, spec in ipairs(mason_registry.get_all_package_specs()) do
+			local lspconfig = vim.tbl_get(spec, "neovim", "lspconfig")
+			if lspconfig then
+				mappings[spec.name] = lspconfig
 			end
 		end
-
-		local name = type(pkg) == "string" and pkg or pkg.name
-		local srv = mappings[name]
-		if not srv then
-			return
-		end
-		mason_lsp_handler(srv)
 	end
 
+	-- Enable only the servers in the user's lsp_deps. Other installed
+	-- mason packages (formatters such as stylua) must not become LSP clients.
 	for _, pkg in ipairs(mason_registry.get_installed_package_names()) do
-		setup_lsp_for_package(pkg)
+		local name = type(pkg) == "string" and pkg or pkg.name
+		local srv = mappings[name]
+		if srv and vim.tbl_contains(lsp_deps, srv) then
+			mason_lsp_handler(srv)
+		end
 	end
 end
 
