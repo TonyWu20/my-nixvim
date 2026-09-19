@@ -72,6 +72,9 @@ Fixes applied to reach a green build:
 - **Clipboard.** Use the nixvim `clipboard` module. That means
   `clipboard.register = "unnamedplus"`. The raw `options.clipboard.register`
   form is not valid.
+- **Lazy-load events.** `VeryLazy` is a lazy.nvim event. lz-n rejects it at
+  startup because it is passed to `nvim_create_autocmd`. Replace it with valid
+  Neovim autocmd events. `blink-cmp` now uses `BufReadPost`.
 
 ## Restored: two plugins not in nixpkgs
 

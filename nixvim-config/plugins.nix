@@ -323,7 +323,7 @@ in
   # ------------------------------------------------------------------
   plugins.blink-cmp = {
     enable = true;
-    lazyLoad.settings.event = [ "VeryLazy" "InsertEnter" "CmdlineEnter" ];
+    lazyLoad.settings.event = [ "BufReadPost" "InsertEnter" "CmdlineEnter" ];
     settings.snippets.preset = "default";
     settings.term.enabled = false;
     settings.appearance.nerd_font_variant = "normal";
