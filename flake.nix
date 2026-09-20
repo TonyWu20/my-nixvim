@@ -54,7 +54,7 @@
       # `.config`: without the parens Nix binds `.config` onto the argument
       # attrset instead of the call's result ("attribute 'config' missing").
       packages =
-        nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ]
+        nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ]
         (
           system:
           {
