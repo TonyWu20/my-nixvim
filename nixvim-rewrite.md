@@ -180,6 +180,40 @@ Verified in 0.12.5: every `lspBufAction` target (`definition`,
 with no `rhs:` error. A live `pylsp` client attaches, the restart map
 stop-starts it and it reattaches, and the info map prints the command.
 
+## Fixed: ts-autotag legacy-setup hint on entering insert
+
+Entering insert mode printed:
+
+> nvim-ts-autotag: Using the legacy setup opts! Please migrate to the new
+> setup options layout as this will eventually have its support removed in
+> 1.0.0!
+
+The plugin (unstable-2026-04-15) moved its toggles from top-level `setup()`
+keys to a nested `opts` table. Top-level `enable_rename`/`enable_close`/
+`enable_close_on_slash` now trigger a deprecation notice (the plugin's
+`config/plugin.lua` detects a truthy top-level key and `vim.notify`s it).
+Because the plugin lazy-loads on `InsertEnter`, the notice only appeared on
+the first insert.
+
+Our `plugins.ts-autotag.settings.*` is passed straight into `setup()`, so the
+top-level keys hit the legacy path. Migrate to the new layout, which nests
+the toggles under an `opts` table. Since all three values equal the plugin's
+built-in defaults (`enable_close = true`, `enable_rename = true`,
+`enable_close_on_slash = false`), the `settings` block is dropped entirely and
+the plugin's defaults apply:
+
+```nix
+plugins.ts-autotag = {
+  enable = true;
+  lazyLoad.settings.event = "InsertEnter";
+  # No settings: the plugin defaults already match what we want. If overrides
+  # are ever needed, use `settings.opts.*` (never top-level legacy keys).
+};
+```
+
+Verified: the generated init no longer passes any top-level legacy keys, and a
+headless insert into an HTML buffer no longer emits the notice.
+
 ## Remaining work
 
 - Update the consumer `~/nixos-config/nvim/default.nix`. Drop `programs.neovim`

@@ -312,9 +312,9 @@ in
   plugins.ts-autotag = {
     enable = true;
     lazyLoad.settings.event = "InsertEnter";
-    settings.enable_close = true;
-    settings.enable_rename = true;
-    settings.enable_close_on_slash = false;
+    # No settings: the plugin's defaults (enable_close = true,
+    # enable_rename = true, enable_close_on_slash = false) already match
+    # our requirements. Use `settings.opts.*` if we ever need overrides.
   };
   plugins.rainbow-delimiters.enable = true;
 
