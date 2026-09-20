@@ -491,7 +491,17 @@ in
     enable = true;
     lazyLoad.settings.event = [ "CursorHold" "CursorHoldI" ];
     settings.preset = "classic";
-    settings.triggers = [ { "<auto>" = { mode = "nixso"; }; } ];
+    # Which-key v3.x trigger specs use the v2 format: `<auto>` (auto-
+    # generate trigger entries from your keymaps) plus a `mode` field.
+    # The plugin's own default is the positional form
+    # `{ { "<auto>", mode = "nxso" } }`; Nix attrset literals have no
+    # integer keys, so the positional element is written with its named
+    # field instead: `lhs` is a valid v2 spec field and parses to the
+    # same mapping (`mapping.lhs = "<auto>"`). `nixso` = n,i,x,s,o: the
+    # plugin default `nxso` plus insert mode. The old v1 shape
+    # `{ "<auto>" = { mode = "nixso" } }` was rejected with "Invalid
+    # field `<auto>`" in `:checkhealth which-key`.
+    settings.triggers = [ { lhs = "<auto>"; mode = "nixso"; } ];
   };
   plugins.web-devicons.enable = true;
   plugins.telescope = {
