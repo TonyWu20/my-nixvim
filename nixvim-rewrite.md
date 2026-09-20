@@ -104,6 +104,82 @@ The ff/fp search maps, the `on_press` triggers, the `m` tree-hopper map, and
 the `require('search')` block in `extra-lua.nix` now resolve. Both plugins
 are installed.
 
+## Fixed: the line-number column was missing
+
+`nixvim-config/options.nix` set its table under the key `options`. Nixvim's
+top-level option for `vim.opt.*` is `opts`. `options` is not a nixvim option.
+So the module system silently dropped the table.
+
+Every `vim.opt` then fell back to Neovim defaults. That hid the line-number
+column. `number` was off and `signcolumn` was auto.
+
+Fix: rename the key to `opts`. The values now apply globally. This matches the
+old `nvim_set_option_value(name, value, {})` calls.
+
+Verified in the running binary: `number=true`, `relativenumber=true`,
+`signcolumn=yes`.
+
+The option set was reconciled against the old `lua/core/options.lua`:
+
+- Restored 28 missing plain editor options. Examples: `autowrite`,
+  `cursorcolumn`, `virtualedit`, `shada`, `switchbuf`, `textwidth`, `wrap`,
+  `synmaxcol`, `foldenable`.
+- Aligned values to the old config: `completeopt`, `formatoptions`
+  (`"1jcroql"`), `history = 2000`, and `wildignore`.
+- Skipped env-specific options. They referenced `global.cache_dir` and conda
+  paths. These are `backupdir`, `backupskip`, `directory`, `undodir`,
+  `spellfile`. `clipboard` is covered by nixvim's `clipboard.register`.
+- `undolevels = 10000` is new. `breakat` drops one stray backslash.
+
+## Fixed: lazydev completion crashed every non-lua insert
+
+`plugins.blink-cmp` listed `lazydev` in `settings.sources.default`. blink
+builds every default provider on `InsertEnter`. It loads each provider's Lua
+module.
+
+But `lazydev.integrations.blink` only lands on `package.path` after
+`lazydev.nvim` loads. That plugin lazy-loads on `ft = "lua"`. So opening any
+non-lua file and entering insert mode crashed with
+`module 'lazydev.integrations.blink' not found`.
+
+Fix: drop `lazydev` from `sources.default`. Register it per-filetype instead:
+
+```nix
+settings.sources.per_filetype = nlua ''
+  { lua = { "lazydev", inherit_defaults = true } }
+'';
+```
+
+For a lua buffer the provider works. `lazydev` loads first via the `ft`
+lazy-load. For every other buffer it is not in the enabled set. The module
+is never loaded, so there is no crash.
+
+## Fixed: LspAttach keymaps rewired to the Neovim 0.12 API
+
+Decision: rewire, do not drop. The three broken leader maps now use live 0.12
+API:
+
+- `<leader>li` (info): `show_client_info` is gone. A hand-rolled summary
+  (id, name, `c.config.cmd`, `root_dir`) is shown via `vim.notify`. Reads the
+  client's `config.cmd`, because a 0.12 client carries no runtime `cmd` field.
+- `<leader>lr` (restart): `vim.lsp.buf.restart` is gone. Stops the active
+  client with the `Client:stop()` method, then `vim.lsp.start` on a deep copy
+  of the registered config with `root_dir` pinned. `LspAttach` fires again, so
+  the autocmd re-registers the keymaps.
+- `<leader>ca` (code action for selection): `select_code_action` is gone.
+  Rewired to `lspBufAction = "code_action"`, which is the live 0.12 function
+  (floating UI, applied to the visual range in visual mode).
+
+Also swapped the two deprecated calls for their live forms:
+`vim.lsp.get_active_clients()` -> `vim.lsp.get_clients({ bufnr })` and
+`vim.lsp.stop_client(id)` -> `client:stop()`.
+
+Verified in 0.12.5: every `lspBufAction` target (`definition`,
+`declaration`, `references`, `implementation`, `hover`, `document_symbol`,
+`signature_help`, `code_action`) is non-nil, so the `LspAttach` loop completes
+with no `rhs:` error. A live `pylsp` client attaches, the restart map
+stop-starts it and it reattaches, and the info map prints the command.
+
 ## Remaining work
 
 - Update the consumer `~/nixos-config/nvim/default.nix`. Drop `programs.neovim`

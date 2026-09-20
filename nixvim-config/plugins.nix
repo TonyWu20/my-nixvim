@@ -343,9 +343,19 @@ in
       "path"
       "buffer"
       "ripgrep"
-      "lazydev"
       "latex-symbols"
     ];
+    # lazydev is a per-filetype source, not a global default. Its module
+    # (lazydev.integrations.blink) only lands on package.path once lazydev.nvim
+    # is loaded (ft = "lua"). blink requires the module for every provider in
+    # `sources.default` on InsertEnter, so a global lazydev entry would crash
+    # on any non-lua buffer. Registering it for the lua filetype only keeps the
+    # completion available there while leaving other buffers crash-free.
+    settings.sources.per_filetype = nlua ''
+      {
+        lua = { "lazydev", inherit_defaults = true },
+      }
+    '';
     settings.sources.providers = {
       lazydev = {
         name = "LazyDev";
@@ -537,6 +547,11 @@ in
 
   # LSP attach keymaps (port of the old LspAttach block). Registered on
   # `LspAttach` by the top-level `lsp` module; each map is buffer-local.
+  #
+  # `lspBufAction` resolves to `vim.lsp.buf.<action>`. The `gd`, `gD`, `gr`,
+  # `gi`, `K`, `gO`, `gs`, `ga` maps still exist in Neovim 0.12. The three
+  # leader maps used API that 0.12 removed (`restart`, `show_client_info`,
+  # `select_code_action`) and are rewritten against the 0.12 API below.
   lsp.keymaps = [
     { key = "gd"; lspBufAction = "definition"; mode = "n"; options.desc = "lsp: Goto definition"; }
     { key = "gD"; lspBufAction = "declaration"; mode = "n"; options.desc = "lsp: Goto declaration"; }
@@ -546,14 +561,27 @@ in
     { key = "gO"; lspBufAction = "document_symbol"; mode = "n"; options.desc = "lsp: Document outline"; }
     { key = "gs"; lspBufAction = "signature_help"; mode = "n"; options.desc = "lsp: Signature help"; }
     { key = "ga"; lspBufAction = "code_action"; mode = "n"; options.desc = "lsp: Code action for cursor"; }
-    { key = "<leader>li"; mode = "n"; action = nlua "function() vim.lsp.buf.show_client_info() end"; options.desc = "lsp: Info"; }
-    { key = "<leader>lr"; lspBufAction = "restart"; mode = "n"; options.desc = "lsp: Restart"; }
+    # 0.12: `show_client_info` was removed. Show a summary of the active
+    # client(s) instead (id, name, command, root dir).
     {
-      key = "<leader>ca";
-      mode = "v";
-      action = nlua "function() vim.lsp.buf.select_code_action() end";
-      options.desc = "lsp: Code action for selection";
+      key = "<leader>li";
+      mode = "n";
+      action = nlua "function() local a=vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() }); if #a==0 then vim.notify('No LSP client', vim.log.levels.WARN) return end local L={} for _,c in ipairs(a) do local src = (c.config and c.config.cmd) or c.cmd local cmd = type(src)=='table' and table.concat(src,' ') or tostring(src) table.insert(L, ('Client %s [id=%d]'):format(c.name, c.id)) table.insert(L, '  cmd: '..cmd) table.insert(L, '  root_dir: '..tostring(c.root_dir)) end vim.notify(table.concat(L, string.char(10)), vim.log.levels.INFO, { title = 'LSP' }) end";
+      options.desc = "lsp: Info";
     }
+    # 0.12: `vim.lsp.buf.restart` was removed. Stop the active client(s) with
+    # the `Client:stop()` method (the `stop_client` fn is deprecated), then
+    # `vim.lsp.start` re-attaches via the servers nixvim enabled.
+    # `LspAttach` fires again, so this autocmd re-registers the keymaps.
+    {
+      key = "<leader>lr";
+      mode = "n";
+      action = nlua "function() local a=vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() }); if #a==0 then vim.notify('No LSP client to restart', vim.log.levels.WARN) return end for _,c in ipairs(a) do local cfg=vim.deepcopy(vim.lsp.config[c.name] or {}) cfg.name=c.name cfg.root_dir=c.root_dir or vim.fn.getcwd() c:stop() vim.lsp.start(cfg, {}) end end";
+      options.desc = "lsp: Restart";
+    }
+    # 0.12: `select_code_action` was folded into `code_action` (floating UI,
+    # applied to the visual range when in visual mode).
+    { key = "<leader>ca"; lspBufAction = "code_action"; mode = "v"; options.desc = "lsp: Code action for selection"; }
   ];
 
   # ------------------------------------------------------------------
