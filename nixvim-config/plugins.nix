@@ -79,25 +79,25 @@ in
       {
         type = "text";
         val = [
-          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣠⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣡⣾⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣟⠻⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⡿⢫⣷⣿⣿⣿⣿⣿⣿⣾⣯⣿⡿⢧⡚⢷⣌⣽⣿⣿⣿⣿⣿⣶⡌⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⠇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣮⣇⣘⠿⢹⣿⣿⣿⣿⣿⣻⢿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⡇⣿⣿⣿⣿⣿⣿⡟⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⣻⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⡇⠀⣬⠏⣿⡇⢻⣿⣿⣿⣿⣿⣷⣼⣿⣿⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⠀⠈⠁⠀⣿⡇⠘⡟⣿⣿⣿⣿⣿⣿⡏⠿⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿⣇⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⡏⠀⠀⠐⠀⢻⣇⠀⠀⠹⣿⣿⣿⣿⣿⣿⣩⡶⠼⠟⠻⠞⣿⡈⠻⣟⢻⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⢿⠀⡆⠀⠘⢿⢻⡿⣿⣧⣷⢣⣶⡃⢀⣾⡆⡋⣧⠙⢿⣿⣿⣟⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⡥⠂⡐⠀⠁⠑⣾⣿⣿⣾⣿⣿⣿⡿⣷⣷⣿⣧⣾⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⡿⣿⣍⡴⠆⠀⠀⠀⠀⠀⠀⠀⠀⣼⣄⣀⣷⡄⣙⢿⣿⣿⣿⣿⣯⣶⣿⣿⢟⣾⣿⣿⢡⣿⣿⣿⣿⣿"
-          "⣿⡏⣾⣿⣿⣿⣷⣦⠀⠀⠀⢀⡀⠀⠀⠠⣭⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⣡⣾⣿⣿⢏⣾⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⣿⣿⣿⣿⣿⡴⠀⠀⠀⠀⠀⠠⠀⠰⣿⣿⣿⣷⣿⠿⠿⣿⣿⣭⡶⣫⠔⢻⢿⢇⣾⣿⣿⣿⣿⣿⣿⣿"
-          "⣿⣿⣿⡿⢫⣽⠟⣋⠀⠀⠀⠀⣶⣦⠀⠀⠀⠈⠻⣿⣿⣿⣾⣿⣿⣿⣿⡿⣣⣿⣿⢸⣾⣿⣿⣿⣿⣿⣿⣿"
-          "⡿⠛⣹⣶⣶⣶⣾⣿⣷⣦⣤⣤⣀⣀⠀⠀⠀⠀⠀⠀⠉⠛⠻⢿⣿⡿⠫⠾⠿⠋⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⢀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⡆⣠⢀⣴⣏⡀⠀⠀⠀⠉⠀⠀⢀⣠⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⠿⠛⠛⠛⠛⠛⠻⢿⣿⣿⣿⣿⣯⣟⠷⢷⣿⡿⠋⠀⠀⠀⠀⣵⡀⢠⡿⠋⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
-          "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⢿⣿⣿⠂⠀⠀⠀⠀⠀⢀⣽⣿⣿⣿⣿⣿⣿⣿⣍⠛⠿⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣠⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣡⣾⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣟⠻⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⡿⢫⣷⣿⣿⣿⣿⣿⣿⣿⣾⣯⣿⡿⢧⡚⢷⣌⣽⣿⣿⣿⣿⣿⣶⡌⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⠇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣮⣇⣘⠿⢹⣿⣿⣿⣿⣿⣻⢿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⠀⢸⣿⣿⡇⣿⣿⣿⣿⣿⣿⣿⣿⡟⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⣻⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⡇⠀⣬⠏⣿⡇⢻⣿⣿⣿⣿⣿⣿⣿⣷⣼⣿⣿⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⢻⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⠀⠈⠁⠀⣿⡇⠘⡟⣿⣿⣿⣿⣿⣿⣿⣿⡏⠿⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿⣇⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⡏⠀⠀⠐⠀⢻⣇⠀⠀⠹⣿⣿⣿⣿⣿⣿⣩⡶⠼⠟⠻⠞⣿⡈⠻⣟⢻⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⢿⠀⡆⠀⠘⢿⢻⡿⣿⣧⣷⢣⣶⡃⢀⣾⡆⡋⣧⠙⢿⣿⣿⣟⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⡥⠂⡐⠀⠁⠑⣾⣿⣿⣾⣿⣿⣿⡿⣷⣷⣿⣧⣾⣿⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⡿⣿⣍⡴⠆⠀⠀⠀⠀⠀⠀⠀⠀⣼⣄⣀⣷⡄⣙⢿⣿⣿⣿⣿⣯⣶⣿⣿⢟⣾⣿⣿⢡⣿⣿⣿⣿⣿"
+	"⣿⡏⣾⣿⣿⣿⣷⣦⠀⠀⠀⢀⡀⠀⠀⠠⣭⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⣡⣾⣿⣿⢏⣾⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⣿⣿⣿⣿⣿⡴⠀⠀⠀⠀⠀⠠⠀⠰⣿⣿⣿⣷⣿⠿⠿⣿⣿⣭⡶⣫⠔⢻⢿⢇⣾⣿⣿⣿⣿⣿⣿"
+	"⣿⣿⣿⡿⢫⣽⠟⣋⠀⠀⠀⠀⣶⣦⠀⠀⠀⠈⠻⣿⣿⣿⣾⣿⣿⣿⣿⡿⣣⣿⣿⢸⣾⣿⣿⣿⣿⣿⣿⣿"
+	"⡿⠛⣹⣶⣶⣶⣾⣿⣷⣦⣤⣤⣀⣀⠀⠀⠀⠀⠀⠀⠉⠛⠻⢿⣿⡿⠫⠾⠿⠋⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⢀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣀⡆⣠⢀⣴⣏⡀⠀⠀⠀⠉⠀⠀⢀⣠⣰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⠿⠛⠛⠛⠛⠛⠛⠻⢿⣿⣿⣿⣿⣯⣟⠷⢷⣿⡿⠋⠀⠀⠀⠀⣵⡀⢠⡿⠋⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿"
+	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⢿⣿⣿⠂⠀⠀⠀⠀⠀⢀⣽⣿⣿⣿⣿⣿⣿⣿⣍⠛⠿⣿⣿⣿⣿⣿⣿"
         ];
         opts = { position = "center"; hl = "AlphaHeader"; };
       }
@@ -273,6 +273,14 @@ in
     lazyLoad.settings.cmd = [ "SudaRead" "SudaWrite" ];
   };
 
+  # tpope/vim-sleuth: auto-detects indent/tab options per filetype. Port of
+  # the old editor.lua spec: lazy on BufNewFile/BufReadPost/BufFilePost, no
+  # settings table. The module defaults (heuristics on) already match.
+  plugins.sleuth = {
+    enable = true;
+    lazyLoad.settings.event = [ "BufNewFile" "BufReadPost" "BufFilePost" ];
+  };
+
   # Treesitter: install the full Nix grammar set (superset of the old
   # ensure_installed list). highlight + indent via native APIs.
   plugins.treesitter = {
@@ -440,6 +448,115 @@ in
   plugins.lsp-format.enable = true; # format-on-save via LSP / none-ls
   plugins.lspconfig.enable = true; # nvim-lspconfig registry (server defaults)
 
+  # nvimdev/lspsaga: LSP UI (code actions, diagnostic flythrough, hover,
+  # rename, call hierarchy). Port of the old lua/modules/configs/completion/
+  # lspsaga.lua, lazy-loaded on LspAttach as before.
+  #
+  # Functional settings are ported verbatim. The icon-glyph fields that
+  # nvimdots pulled from its modules.utils.icons table (ui.kind, ui.imp_sign,
+  # ui.expand, ui.collapse, ui.code_action, ui.actionfix,
+  # symbol_in_winbar.separator) are dropped: web-devicons (enabled above)
+  # supplies the lspkind glyphs lspsaga falls back to.
+  #
+  # Nixvim warns that `implement` wants `symbol_in_winbar` enabled. The old
+  # config deliberately ran implement on with the winbar breadcrumbs off, so
+  # the port keeps that combination and accepts the build warning.
+  #
+  # hover.open_cmd uses the old core.settings external_browser default.
+  plugins.lspsaga = {
+    enable = true;
+    lazyLoad.settings.event = "LspAttach";
+    settings = {
+      symbol_in_winbar.enable = false;
+      callhierarchy.layout = "float";
+      callhierarchy.keys = {
+        edit = "e";
+        vsplit = "v";
+        split = "s";
+        tabe = "t";
+        quit = "q";
+        shuttle = "[]";
+        toggle_or_req = "u";
+        close = "<Esc>";
+      };
+      code_action = {
+        num_shortcut = true;
+        only_in_cursor = false;
+        show_server_name = true;
+        extend_gitsigns = false;
+        keys = {
+          quit = "q";
+          exec = "<CR>";
+        };
+      };
+      diagnostic = {
+        show_code_action = true;
+        jump_num_shortcut = true;
+        max_width = 0.5;
+        max_height = 0.6;
+        text_hl_follow = true;
+        border_follow = true;
+        extend_relatedInformation = true;
+        show_layout = "float";
+        show_normal_height = 10;
+        max_show_width = 0.9;
+        max_show_height = 0.6;
+        diagnostic_only_current = false;
+        keys = {
+          exec_action = "r";
+          quit = "q";
+          toggle_or_jump = "<CR>";
+          quit_in_show = [ "q" "<Esc>" ];
+        };
+      };
+      hover = {
+        max_width = 0.45;
+        max_height = 0.7;
+        open_link = "gl";
+        open_cmd = "silent ! chrome-cli open";
+      };
+      implement = {
+        enable = true;
+        sign = true;
+        virtual_text = false;
+        priority = 100;
+      };
+      lightbulb = {
+        enable = false;
+        sign = true;
+        virtual_text = false;
+        debounce = 10;
+        sign_priority = 20;
+      };
+      rename = {
+        in_select = false;
+        auto_save = false;
+        project_max_width = 0.5;
+        project_max_height = 0.5;
+        keys = {
+          quit = "<C-c>";
+          exec = "<CR>";
+          select = "x";
+        };
+      };
+      beacon = {
+        enable = true;
+        frequency = 12;
+      };
+      ui = {
+        border = "single";
+        devicon = true;
+        title = true;
+        lines = [ "┗" "┣" "┃" "━" "┏" ];
+      };
+      scroll_preview = {
+        scroll_down = "<C-d>";
+        scroll_up = "<C-u>";
+      };
+      request_timeout = 3000;
+    };
+  };
+
   # ------------------------------------------------------------------
   # Language packs
   # ------------------------------------------------------------------
@@ -486,6 +603,9 @@ in
       "NvimTreeFindFileToggle"
       "NvimTreeRefresh"
     ];
+    # Port of the NvimTreeAutoClose autocmd from the old core/event.lua:
+    # quit when the tree is the only remaining window in the tab.
+    autoClose = true;
   };
   plugins.which-key = {
     enable = true;
@@ -538,6 +658,8 @@ in
     pylsp.enable = true;
     fish_lsp.enable = true;
     tinymist.enable = true;
+    nixd = { enable = true; config.filetypes= ["nix"];};
+    taplo.enable=true;
     harper_ls = {
       enable = true;
       config = {
@@ -555,22 +677,46 @@ in
     };
   };
 
-  # LSP attach keymaps (port of the old LspAttach block). Registered on
-  # `LspAttach` by the top-level `lsp` module; each map is buffer-local.
+  # LSP attach keymaps. Port of M.lsp from the old keymap/completion.lua,
+  # now routed through lspsaga. Registered on `LspAttach` by the top-level
+  # `lsp` module; each map is buffer-local. lspsaga lazy-loads on the same
+  # event, so its `:Lspsaga` user command is available when these maps fire;
+  # `:Telescope` is registered by telescope's own lazy-load cmd trigger.
   #
-  # `lspBufAction` resolves to `vim.lsp.buf.<action>`. The `gd`, `gD`, `gr`,
-  # `gi`, `K`, `gO`, `gs`, `ga` maps still exist in Neovim 0.12. The three
-  # leader maps used API that 0.12 removed (`restart`, `show_client_info`,
-  # `select_code_action`) and are rewritten against the 0.12 API below.
+  # Diffs vs the previous 0.12-only set (all per the old nvimdots config):
+  # `gd` previews the definition via lspsaga (old: plain goto); `gD` goes to
+  # the definition (old: declaration); `gr` renames via lspsaga (old:
+  # references, which moved to `gh`); `gm`/`gto` replace `gi`/`gO` with
+  # telescope pickers. `ga` replaces the old `<leader>ca` for code
+  # actions. It maps in n and v modes as two entries, since the
+  # keymap option takes one mode per entry. New: `g[`, `g]`, `gci`,
+  # `gco`, `<leader>lx`, `<leader>lh`.
+  # `<leader>li`/`<leader>lr` keep the 0.12 rewrites below. The old
+  # virtual-lines toggle (`<leader>lv`) is dropped with
+  # tiny-inline-diagnostic.
   lsp.keymaps = [
-    { key = "gd"; lspBufAction = "definition"; mode = "n"; options.desc = "lsp: Goto definition"; }
-    { key = "gD"; lspBufAction = "declaration"; mode = "n"; options.desc = "lsp: Goto declaration"; }
-    { key = "gr"; lspBufAction = "references"; mode = "n"; options.desc = "lsp: References"; }
-    { key = "gi"; lspBufAction = "implementation"; mode = "n"; options.desc = "lsp: Implementations"; }
-    { key = "K"; lspBufAction = "hover"; mode = "n"; options.desc = "lsp: Show doc"; }
-    { key = "gO"; lspBufAction = "document_symbol"; mode = "n"; options.desc = "lsp: Document outline"; }
+    { key = "gd"; mode = "n"; action = ":Lspsaga peek_definition<CR>"; options.desc = "lsp: Preview definition"; }
+    { key = "gD"; mode = "n"; action = ":Lspsaga goto_definition<CR>"; options.desc = "lsp: Goto definition"; }
+    { key = "gr"; mode = "n"; action = ":Lspsaga rename<CR>"; options.desc = "lsp: Rename in file range"; }
+    { key = "gR"; mode = "n"; action = ":Lspsaga rename ++project<CR>"; options.desc = "lsp: Rename in project range"; }
+    { key = "K"; mode = "n"; action = ":Lspsaga hover_doc<CR>"; options.desc = "lsp: Show doc"; }
+    { key = "ga"; mode = "n"; action = ":Lspsaga code_action<CR>"; options.desc = "lsp: Code action for cursor"; }
+    { key = "ga"; mode = "v"; action = ":Lspsaga code_action<CR>"; options.desc = "lsp: Code action for cursor"; }
     { key = "gs"; lspBufAction = "signature_help"; mode = "n"; options.desc = "lsp: Signature help"; }
-    { key = "ga"; lspBufAction = "code_action"; mode = "n"; options.desc = "lsp: Code action for cursor"; }
+    { key = "gh"; mode = "n"; action = ":Telescope lsp_references<CR>"; options.desc = "lsp: Show references"; }
+    { key = "gm"; mode = "n"; action = ":Telescope lsp_implementations<CR>"; options.desc = "lsp: Show implementations"; }
+    { key = "gto"; mode = "n"; action = ":Telescope lsp_document_symbols<CR>"; options.desc = "lsp: Document outline"; }
+    { key = "g["; mode = "n"; action = ":Lspsaga diagnostic_jump_prev<CR>"; options.desc = "lsp: Prev diagnostic"; }
+    { key = "g]"; mode = "n"; action = ":Lspsaga diagnostic_jump_next<CR>"; options.desc = "lsp: Next diagnostic"; }
+    { key = "gci"; mode = "n"; action = ":Lspsaga incoming_calls<CR>"; options.desc = "lsp: Show incoming calls"; }
+    { key = "gco"; mode = "n"; action = ":Lspsaga outgoing_calls<CR>"; options.desc = "lsp: Show outgoing calls"; }
+    { key = "<leader>lx"; mode = "n"; action = ":Lspsaga show_line_diagnostics ++unfocus<CR>"; options.desc = "lsp: Line diagnostic"; }
+    {
+      key = "<leader>lh";
+      mode = "n";
+      action = nlua "function() local on = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }) vim.lsp.inlay_hint.enable(not on, { bufnr = 0 }) vim.notify(on and 'Inlay hint disabled' or 'Inlay hint enabled', vim.log.levels.INFO, { title = 'LSP Inlay Hint' }) end";
+      options.desc = "lsp: Toggle inlay hints";
+    }
     # 0.12: `show_client_info` was removed. Show a summary of the active
     # client(s) instead (id, name, command, root dir).
     {
@@ -589,9 +735,6 @@ in
       action = nlua "function() local a=vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() }); if #a==0 then vim.notify('No LSP client to restart', vim.log.levels.WARN) return end for _,c in ipairs(a) do local cfg=vim.deepcopy(vim.lsp.config[c.name] or {}) cfg.name=c.name cfg.root_dir=c.root_dir or vim.fn.getcwd() c:stop() vim.lsp.start(cfg, {}) end end";
       options.desc = "lsp: Restart";
     }
-    # 0.12: `select_code_action` was folded into `code_action` (floating UI,
-    # applied to the visual range when in visual mode).
-    { key = "<leader>ca"; lspBufAction = "code_action"; mode = "v"; options.desc = "lsp: Code action for selection"; }
   ];
 
   # ------------------------------------------------------------------

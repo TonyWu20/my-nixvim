@@ -26,7 +26,7 @@ The core LSP trio you want to keep:
 - [x] `mason-org/mason-lspconfig.nvim` — bridges Mason and LSP. nvimdots uses it to auto-install
       servers listed in `settings.lsp_deps` / `null_ls_deps` / `dap_deps` / `treesitter_deps`.
 - [ ] `folke/neoconf.nvim` — one-shot LSP config generator (`NeoconfCreate`). Convenience only.
-- [] `nvimdev/lspsaga.nvim` — LSP UI: code actions menu, code lens, diagnostic flythrough.
+- [x] `nvimdev/lspsaga.nvim` — LSP UI: code actions menu, code lens, diagnostic flythrough.
 - [ ] `rachartier/tiny-inline-diagnostic.nvim` — inline diagnostic icons in the code.
 - [ ] `joechrisellis/lsp-format-modifications.nvim` — LSP format only the lines you changed on save.
 - [x] `nvimtools/none-ls.nvim` (+ `jay-babu/mason-null-ls.nvim`) — run external formatters
@@ -54,13 +54,13 @@ The core LSP trio you want to keep:
 - [x] `folke/flash.nvim` — character/word jump (partial replacement of hop/wilder/treehopper).
 - [x] `numToStr/Comment.nvim` — `gc`-style comment toggling.
 - [ ] `sindrets/diffview.nvim` — git diff UI.
-- [] `echasnovski/mini.align` — `gv` block aligning.
+- [ ] `echasnovski/mini.align` — `gv` block aligning.
 - [x] `echasnovski/mini.cursorword` — highlight word under cursor.
 - [ ] `smoka7/hop.nvim` — two-key word jump. You have it disabled. flash.nvim overlaps.
 - [ ] `brenoprata10/nvim-highlight-colors` — hex color highlight under cursor.
 - [ ] `romainl/vim-cool` — auto-indent / auto-shift.
 - [x] `lambdalisue/suda.vim` — `:SudaRead` / `:SudaWrite` (sudo edit).
-- [ ] `tpope/vim-sleuth` — auto-detect indent/tab options per filetype.
+- [x] `tpope/vim-sleuth` — auto-detect indent/tab options per filetype.
 - [ ] `MagicDuck/grug-far.nvim` — file browser with git ops (alternate to telescope finders).
 
 ### Tree-sitter add-ons (core `nvim-treesitter/nvim-treesitter` is your item 4 — kept)
@@ -92,7 +92,7 @@ The core LSP trio you want to keep:
 - [x] `ibhagwan/smartyank.nvim` — auto-copy yanked text to system clipboard.
 - [ ] `michaelb/sniprun` — run selected code in a shell. You have it disabled.
 - [ ] `akinsho/toggleterm.nvim` — persistent named terminals.
-- [] `folke/trouble.nvim` — diagnostics/locations list UI.
+- [ ] `folke/trouble.nvim` — diagnostics/locations list UI.
 - [x] `folke/which-key.nvim` — keybinding cheat sheet on prefix.
 - [ ] `olimorris/codecompanion.nvim` (+ `ravitemer/codecompanion-history.nvim`) — AI chat.
       Off for you (`use_chat=false`).

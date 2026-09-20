@@ -84,9 +84,14 @@ in
     { key = "<leader>gG"; mode = "n"; action = ":Git<CR>"; options.desc = "git: Open fugitive"; }
 
     # ---- nvim-tree ----
+    # Port of the old tool.lua maps: `nf` (find file) and `nr` (refresh).
+    # The old "filetree: Toggle" was `<C-n>` via edgy's left panel; edgy is
+    # dropped in this config, so the same key now drives nvim-tree's native
+    # toggle. `<leader>nt` keeps the toggle on the leader prefix too.
     { key = "<leader>nf"; mode = "n"; action = ":NvimTreeFindFile<CR>"; options.desc = "filetree: Find file"; }
     { key = "<leader>nr"; mode = "n"; action = ":NvimTreeRefresh<CR>"; options.desc = "filetree: Refresh"; }
     { key = "<leader>nt"; mode = "n"; action = ":NvimTreeToggle<CR>"; options.desc = "filetree: Toggle tree"; }
+    { key = "<C-n>"; mode = "n"; action = ":NvimTreeToggle<CR>"; options.desc = "filetree: Toggle tree (was edgy's left panel in nvimdots)"; }
 
     # ---- render-markdown ----
     { key = "<F1>"; mode = "n"; action = ":RenderMarkdown toggle<CR>"; options.desc = "tool: Toggle markdown preview"; }

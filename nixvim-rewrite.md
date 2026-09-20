@@ -214,6 +214,59 @@ plugins.ts-autotag = {
 Verified: the generated init no longer passes any top-level legacy keys, and a
 headless insert into an HTML buffer no longer emits the notice.
 
+## Added: lspsaga and vim-sleuth (plugin-selection update)
+
+`plugin-selection.md` flipped `nvimdev/lspsaga.nvim` and `tpope/vim-sleuth`
+to kept. Both are installed through first-class nixvim modules, not
+`extraPlugins`.
+
+- `plugins.lspsaga` — lazy on `LspAttach`, same trigger as the old
+  `completion.lua` spec. The functional settings are ported from
+  `lua/modules/configs/completion/lspsaga.lua`. The icon-glyph fields
+  (`ui.kind`, `ui.imp_sign`, `ui.expand`, `ui.collapse`, `ui.code_action`,
+  `ui.actionfix`, `symbol_in_winbar.separator`) are dropped on purpose.
+  `nvim-web-devicons` is already installed and supplies the glyphs.
+  `hover.open_cmd` keeps the old `core.settings.external_browser` default,
+  `silent ! chrome-cli open`. `implement` stays enabled while
+  `symbol_in_winbar` stays off, matching the old config. The build warns
+  about that combination. The warning is accepted.
+- `plugins.sleuth` — lazy on `BufNewFile`, `BufReadPost`, `BufFilePost`,
+  with no settings. The module defaults already match the old `editor.lua`
+  spec.
+
+### nvim-tree keymap migration
+
+The old "filetree: Toggle" binding was `<C-n>` driving
+`require("edgy").toggle("left")`. Edgy was dropped in the rewrite, so the
+binding never migrated. `keymaps.nix` now maps `<C-n>` to
+`:NvimTreeToggle<CR>`. The `<leader>nf/nr/nt` maps stay as they were.
+`plugins.nvim-tree` also gained `autoClose = true`. That ports the
+`NvimTreeAutoClose` autocmd from the old `core/event.lua`. The tree quits
+when it is the last window in the tab.
+
+### `lsp.keymaps` rerouted through lspsaga
+
+The LSP-attach keymaps are now the old `M.lsp` from
+`lua/keymap/completion.lua`, routed through lspsaga:
+
+- `gd` previews the definition, `gD` jumps to it, `gr`/`gR` rename in
+  file/project range, `K` shows the doc hover.
+- `ga` runs `:Lspsaga code_action` in both `n` and `v` modes. The nixvim
+  keymap option takes one mode per entry, so the old `nv` combo becomes
+  two entries.
+- `gh`/`gm`/`gto` open the telescope `lsp_references`, `lsp_implementations`
+  and `lsp_document_symbols` pickers (the old helper `picker()` calls).
+- `g[`/`g]` jump between diagnostics, `gci`/`gco` show incoming/outgoing
+  calls, `<leader>lx` shows line diagnostics, `<leader>lh` toggles inlay
+  hints.
+- `<leader>li`/`<leader>lr` keep their Neovim 0.12 rewrites. The old
+  `<leader>ca` is folded into `ga`. The old `<leader>lv` virtual-lines
+  toggle is dropped with tiny-inline-diagnostic.
+
+Verified headless: with a lua_ls client attached, every mapping above
+resolves to a `:Lspsaga` or `:Telescope` action. `:Lspsaga` is undefined
+before the first LSP attach, so the lazy-load trigger still works.
+
 ## Remaining work
 
 - Update the consumer `~/nixos-config/nvim/default.nix`. Drop `programs.neovim`
