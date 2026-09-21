@@ -49,8 +49,10 @@ the rewrite uses the defaults instead of translating every line:
 
 Bespoke behavior that is preserved and ported to Nix:
 
-- **alpha**: the old ASCII art and the two search buttons. The buttons now
-  call `require('search').open` on the `file` and `pattern` collections.
+- **alpha**: the old ASCII art and the two search buttons, plus the old
+  layout spacing and the dynamic footer (see "Fixed: alpha dashboard
+  spacing" below). The buttons now call `require('search').open` on the
+  `file` and `pattern` collections.
 - **gitsigns**: the buffer-scoped hunk keymaps live in `settings.on_attach`.
 - **bufferline**: the `always_show_bufferline`, close/right-click `BufDel`,
   and LSP diagnostics options are kept.
@@ -266,6 +268,86 @@ The LSP-attach keymaps are now the old `M.lsp` from
 Verified headless: with a lua_ls client attached, every mapping above
 resolves to a `:Lspsaga` or `:Telescope` action. `:Lspsaga` is undefined
 before the first LSP attach, so the lazy-load trigger still works.
+
+## Fixed: alpha dashboard spacing and dynamic footer
+
+The old dashboard had padding between sections and a live footer. The
+first port dropped both: the layout went straight from the ASCII art to
+the buttons, then to a static footer line.
+
+- Spacing is restored with alpha `padding` items: 2 blank lines after
+  the art (old `head_butt_padding`) and 1 before the footer (old
+  `foot_butt_padding`). The old dynamic top gap is ported as a
+  function-valued padding item. It recomputes
+  `ceil((winheight - occupied) * 0.25)` at draw time, where occupied is
+  19 art lines + 2*2 buttons + 2 head padding, matching the old
+  `header_padding` formula. The button count (2) is hardcoded, as the
+  old code did.
+- The footer is now a function-valued text section. It renders the
+  nvim version and the plugin count, with the old Nerd Font glyphs
+  (U+F004, U+F028, U+F096) kept as Lua byte escapes.
+- Deviation: the old footer read `lazy.stats()` for plugin count and
+  startuptime. lz-n (native packadd) has no stats API. The count now
+  comes from `nvim_get_runtime_file` over the pack start + opt
+  directories. The "in Mms" timing fragment is dropped.
+
+Verified headless: the generated init renders the dashboard with the
+expected blank lines and a footer reading
+`" Have Fun with neovim v0.12.5 63 plugins"`.
+
+## Added: smart-splits (restored the old split-focus keys)
+
+The old `ui.lua` split bindings (`<C-h/j/k/l>`, `<A-h/j/k/l>`,
+`<leader>Wh/Wj/Wk/Wl`) were lost when `smart-splits.nvim` was left out of
+the first port. It is now enabled.
+
+- `plugins.smart-splits` — enabled. Lazy on `CursorHold`/`CursorHoldI` plus
+  12 `cmd` stubs for the `:Smart*` commands. That makes the focus/resize/swap
+  keys work on first press instead of waiting for the first idle.
+- The 12 keymaps live in `keymaps.nix` under the "smart-splits" section.
+- Settings port the old `splits.lua` (`default_amount = 3`, ignored
+  `NvimTree` buffers). They equal the plugin defaults and are stated
+  explicitly.
+- `plugin-selection.md` marks it kept. `keybinds-migration.md` records it as
+  MIGRATED with the full reasoning.
+
+## Keybind audit
+
+`keybinds-migration.md` is the complete migrated / dropped / adapted list for
+every old keybind. It classifies each one and names the plugin it depends on.
+Nothing was dropped on style grounds. Drops happen only when the plugin is not
+installed here.
+
+Final pass also restored two non-plugin maps that lived outside any plugin:
+
+- `t <Esc><Esc>` → `<C-\><C-n>` (leave terminal). The old `tool.lua` grouped
+  it under toggleterm, but the action is the builtin escape, so it is kept in
+  `keymaps.nix`.
+- The `q` closes non-listed buffers autocmd from old `core/event.lua`. It is
+  ported verbatim to `extra-lua.nix` (`qf`/`help`/`man`/`nofile`/`terminal`
+  and friends get `buflisted=false` plus a buffer-local `q` → `:close`).
+
+`gc`/`gcc` are Neovim 0.12 builtin comment operators. comment.nvim (lazy on
+`CursorHold`) adds `gb`/`gbc` and the extra `gco`/`gcO`/`gcA`.
+
+## Fixed: statusline lost the active LSP server indicator
+
+The nixvim lualine defaults (mode/branch/filename/encoding/progress/location)
+have no LSP client-name component, so the statusline no longer showed which
+server is active. The old nvimdots statusline
+(`lua/modules/configs/ui/lualine.lua`) rendered a custom `components.lsp`
+that listed the attached server names next to the diagnostics count.
+
+The indicator is ported into `settings.sections.lualine_c` as a raw-Lua
+component: `filename` keeps the default section-c entry, `diagnostics`
+restores the old error/warn counts, and the raw component renders
+`LSP[<name, ...>]` for the servers attached to the current buffer (quiet
+when none). Verified headless: on a Lua buffer with an attached client it
+renders `LSP[lua_ls]`; on a plain text buffer it stays empty.
+
+Nix gotcha found while landing this: Nix has no single-quoted strings.
+Raw-Lua values in Nix lists must be wrapped in double-quoted strings
+(`nlua "..."`), with any Lua string literals written as single-quoted.
 
 ## Remaining work
 

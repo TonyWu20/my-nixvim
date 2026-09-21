@@ -134,7 +134,9 @@ Option A is chosen (confirmed 2026-09-19). The boxes below match it.
 - [x] `karb94/neoscroll.nvim` — smooth scrolling.
 - [ ] `rcarriga/nvim-notify` — notification toasts.
 - [ ] `folke/paint.nvim` — `<leader>pp` palette picker.
-- [ ] `mrjones2014/smart-splits.nvim` — open splits in the last-used direction.
+- [x] `mrjones2014/smart-splits.nvim` — directional split focus/resize/swap.
+      Added back 2026-10: it provides the old `<C-h/j/k/l>` split-focus keys.
+      See `keybinds-migration.md` §2.5.
 - [ ] `folke/edgy.nvim` — edge windows (statusline/indent).
 - [ ] `folke/todo-comments.nvim` (+ `nvim-lua/plenary.nvim`) — `-- TODO` collection.
 - [x] `dstein64/nvim-scrollview` — scrollbar with minimap.

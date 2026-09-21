@@ -82,5 +82,22 @@
     pcall(function()
       require('mini.surround').setup()
     end)
+
+    -- ---- q closes non-listed buffers (ported from old core/event.lua) ----
+    -- The old config set `buflisted=false` and a buffer-local `q` -> `:close`
+    -- on these filetypes. The `toggleterm`/`copilot` entries no longer match
+    -- anything (those plugins are gone) but are kept for fidelity.
+    pcall(function()
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = {
+          'qf', 'help', 'man', 'notify', 'nofile', 'terminal',
+          'prompt', 'toggleterm', 'copilot', 'startuptime', 'tsplayground',
+        },
+        callback = function(event)
+          vim.bo[event.buf].buflisted = false
+          vim.api.nvim_buf_set_keymap(event.buf, 'n', 'q', '<Cmd>close<CR>', { silent = true })
+        end,
+      })
+    end)
   '';
 }
