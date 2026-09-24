@@ -3,10 +3,23 @@
 # Each block is pcall-guarded so a missing/renamed plugin degrades instead of
 # crashing startup.
 #
+# `extraConfigLuaPre` content lands early in the generated init, ahead of
+# the dashboard draw. It captures the monotonic start-time baseline that
+# the alpha footer timer (plugins.nix) renders as "in Mms". No-arg
+# `reltime()` is boot-relative, so the baseline must be captured
+# explicitly.
+#
 # `extraConfigLuaPost` is a single string (types.lines), so all blocks are
 # concatenated into one literal. Lua `#` is the length operator, so section
 # headers use Lua `--` comments, not Nix `#`.
 {
+  extraConfigLuaPre = ''
+    -- Startup timer baseline for the alpha footer (plugins.nix): the
+    -- monotonic nanoseconds since process start. No-arg `reltime()` is
+    -- boot-relative, so the baseline must be captured explicitly.
+    vim.g.nixvim_start_ns = (vim.uv or vim.loop).hrtime()
+  '';
+
   extraConfigLuaPost = ''
     -- ---- search.nvim: tabbed ff/fp collections (confirmed Option A) ----
     pcall(function()

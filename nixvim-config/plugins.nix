@@ -99,9 +99,14 @@ in
       #
       # The old footer showed the nvim version plus plugin count and startuptime
       # from `require("lazy").stats()`. Nixvim's lazy-load provider is lz-n
-      # (native packadd), which has no stats API, so the ported footer shows
-      # the nvim version and the plugin count from `nvim_get_runtime_file` over
-      # the pack path (start + opt dirs) and drops the "in Mms" timing.
+      # (native packadd), which has no stats API, so the plugin count comes
+      # from `nvim_get_runtime_file` over the pack path (start + opt dirs).
+      # The "in Mms" startuptime is restored with the monotonic clock: an
+      # `extraConfigLuaPre` block (extra-lua.nix) captures
+      # `(vim.uv or vim.loop).hrtime()` into `vim.g.nixvim_start_ns` early in
+      # the generated init (ahead of the post-load plugin setup); the footer
+      # below renders the delta in ms. No-arg `reltime()` is boot-relative,
+      # not process-start, so a captured baseline is needed.
       settings.layout = [
         {
           type = "padding";
@@ -188,9 +193,24 @@ in
                   + #vim.api.nvim_get_runtime_file("pack/*/opt/*", true)
               end)
               if ok then n = count end
+              -- Startuptime, in ms, rounded to 0.01ms: the delta from the
+              -- monotonic baseline `vim.g.nixvim_start_ns` (captured in
+              -- `extraConfigLuaPre`, extra-lua.nix) to now. No-arg
+              -- `reltime()` is boot-relative, not process-start, so a
+              -- captured monotonic baseline is required for a startup
+              -- timer. Frozen on first render so a later dashboard
+              -- redraw does not inflate it (matches the old lazy
+              -- startuptime, a fixed value). Falls back to 0 ms if the
+              -- baseline is missing (alpha loaded outside the nixvim init).
+              local uv = vim.uv or vim.loop
+              if not vim.g.nixvim_alpha_start_ms and vim.g.nixvim_start_ns then
+                vim.g.nixvim_alpha_start_ms =
+                  math.floor((uv.hrtime() - vim.g.nixvim_start_ns) / 1e4 + 0.5) / 100
+              end
+              local ms = vim.g.nixvim_alpha_start_ms or 0
               return " \239\128\132  Have Fun with neovim"
                 .. "  \239\128\168 v" .. v.major .. "." .. v.minor .. "." .. v.patch
-                .. "  \239\130\150 " .. n .. " plugins"
+                .. "  \239\130\150 " .. n .. " plugins in " .. ms .. "ms"
             end
           '';
           opts = {

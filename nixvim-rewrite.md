@@ -284,16 +284,39 @@ the buttons, then to a static footer line.
   `header_padding` formula. The button count (2) is hardcoded, as the
   old code did.
 - The footer is now a function-valued text section. It renders the
-  nvim version and the plugin count, with the old Nerd Font glyphs
-  (U+F004, U+F028, U+F096) kept as Lua byte escapes.
-- Deviation: the old footer read `lazy.stats()` for plugin count and
-  startuptime. lz-n (native packadd) has no stats API. The count now
-  comes from `nvim_get_runtime_file` over the pack start + opt
-  directories. The "in Mms" timing fragment is dropped.
+  nvim version, the plugin count, and the "in Mms" startuptime. The
+  old Nerd Font glyphs (U+F004, U+F028, U+F096) are kept as Lua byte
+  escapes.
+- The count comes from `nvim_get_runtime_file` over the pack start +
+  opt directories, since lz-n has no stats API.
+- The timing was first dropped in this port, then restored. See
+  "Restored: alpha footer startuptime" below.
 
 Verified headless: the generated init renders the dashboard with the
 expected blank lines and a footer reading
-`" Have Fun with neovim v0.12.5 63 plugins"`.
+`" Have Fun with neovim v0.12.5 65 plugins in <N>ms"`.
+
+## Restored: alpha footer startuptime ("in Mms")
+
+The old lazy.nvim footer read `lazy.stats().startuptime`. lz-n has no
+stats API. The first port therefore dropped the timing fragment. The
+timer is restored without a stats API. It uses a captured monotonic
+baseline.
+
+- Baseline capture: an `extraConfigLuaPre` block in `extra-lua.nix`
+  stores `(vim.uv or vim.loop).hrtime()` in `vim.g.nixvim_start_ns`.
+  The block lands in the generated init ahead of the extra-config
+  plugin setup and the dashboard draw. The baseline is therefore the
+  early-init point, close to process start.
+- Footer render: the footer function in `plugins.nix` computes the
+  delta to `hrtime()` in ms. It rounds to 0.01ms and freezes the
+  value in `vim.g.nixvim_alpha_start_ms` on first render. Later
+  dashboard redraws reuse the frozen value. That matches the old fixed
+  `startuptime`. If the baseline is missing, it falls back to 0 ms.
+- Why not `reltime()`: no-arg `reltime()` is boot-relative. It
+  returns system uptime, not process-start time, so it cannot measure
+  startup. Two monotonic `hrtime()` readings do the job: one captured
+  early, one at first render.
 
 ## Added: smart-splits (restored the old split-focus keys)
 
