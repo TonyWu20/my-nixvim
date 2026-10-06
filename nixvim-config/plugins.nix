@@ -907,10 +907,7 @@ in
       };
       settings.server.standalone = true;
       settings.server.default_settings."rust-analyzer" = {
-        checkOnSave = {
-          allFeatures = true;
-          command = "cargo check";
-        };
+        checkOnSave = true;
         procMacro = {
           enable = true;
         };
