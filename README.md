@@ -14,7 +14,8 @@ nixvim-config/
   default.nix          Module root: imports, colorscheme, globals, runtime packages
   options.nix          vim.opt.* table
   keymaps.nix          Global keymaps
-  plugins.nix          Plugin enable-set, settings, LSP servers, formatters
+  plugins.nix          Plugins grouped by nvimdots category (completion,
+                             editor, lang, tool, ui), LSP servers, formatters
   extra-lua.nix        pcall-guarded setup() for plugins with no nixvim module
 nixvim-rewrite.md      Migration record: old init.lua/lazy.nvim -> nixvim
 plugin-selection.md    Why each plugin was kept or dropped
@@ -135,6 +136,18 @@ the blink-ripgrep source.
   migration.
 - **Keymaps**: `keymaps` in `keymaps.nix`. Actions are command strings
   (`":w<CR>"`) or raw-Lua functions via `nlua`.
+- **Picker-internal keymaps**: keymaps that only work inside a telescope
+  prompt live in `plugins.telescope.settings.defaults.mappings`, not in
+  `keymaps.nix`. The `yankPath` raw-Lua action (let block in `plugins.nix`)
+  yanks the highlighted entry's filepath to the clipboard on `<C-y>` in both
+  prompt modes.
+- **Telescope loads eagerly** (no `lazyLoad` on the telescope block in
+  `plugins.nix`): in this nixvim pin the built pack dir puts telescope.nvim
+  in `start/` either way, and its own `:Telescope` command would then beat
+  the lz-n trigger, leaving the generated `telescope.setup()` (and every
+  setting above) unapplied. Eager loading moves the setup call into the
+  startup lua config. Revert by re-adding `lazyLoad.settings.cmd =
+  "Telescope";`.
 - **Globals** (`vim.g.*`): the `globals` table in `default.nix`. Use it
   only for globals that no plugin module declares. Plugin-exposed globals
   (e.g. `matchup_*`) are set on `plugins.<name>.settings.*`. Setting them

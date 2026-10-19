@@ -8,6 +8,28 @@ let
   # string or a mkRaw value. mkRaw emits the code as unquoted Lua. A
   # nestedLiteralLua value (an attrset) is rejected by those types.
   nlua = lib.nixvim.mkRaw;
+
+  # Telescope picker action: yank the filepath of the highlighted entry to
+  # the `"` register (the system clipboard, routed via unnamedplus; see
+  # default.nix). Bound to `<C-y>` in the telescope block below. `filename`
+  # is set on grep entries; `value` holds the path on file-picker entries.
+  yankPath = nlua ''
+    function(prompt_bufnr)
+      local state = require("telescope.actions.state")
+      local entry = state.get_selected_entry()
+      if not entry then
+        local picker = state.get_current_picker(prompt_bufnr)
+        entry = picker and picker.get_selection(picker)
+      end
+      if entry then
+        local path = entry.filename or entry.value
+        if type(path) == "string" and path ~= "" then
+          vim.fn.setreg('"', path)
+          vim.notify("Yanked: " .. path)
+        end
+      end
+    end
+  '';
 in
 {
 
@@ -83,6 +105,732 @@ in
     # ------------------------------------------------------------------
     lz-n.enable = true;
 
+    # ------------------------------------------------------------------
+    # Completion (nvimdots category: completion.lua)
+    # ------------------------------------------------------------------
+    blink-cmp = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "BufReadPost"
+        "InsertEnter"
+        "CmdlineEnter"
+      ];
+      settings.snippets.preset = "default";
+      settings.term.enabled = false;
+      settings.appearance.nerd_font_variant = "normal";
+      settings.fuzzy.implementation = "prefer_rust_with_warning";
+      settings.cmdline.enabled = true;
+      settings.cmdline.sources = nlua ''
+        function()
+          local t = vim.fn.getcmdtype()
+          if t == '/' or t == '?' then return { 'buffer' } end
+          if t == ':' or t == '@' then return { 'cmdline', 'path' } end
+          return {}
+        end
+      '';
+      settings.sources.default = [
+        "lsp"
+        "snippets"
+        "path"
+        "buffer"
+        "ripgrep"
+        "latex-symbols"
+      ];
+      # lazydev is a per-filetype source, not a global default. Its module
+      # (lazydev.integrations.blink) only lands on package.path once lazydev.nvim
+      # is loaded (ft = "lua"). blink requires the module for every provider in
+      # `sources.default` on InsertEnter, so a global lazydev entry would crash
+      # on any non-lua buffer. Registering it for the lua filetype only keeps the
+      # completion available there while leaving other buffers crash-free.
+      settings.sources.per_filetype = nlua ''
+        {
+          lua = { "lazydev", inherit_defaults = true },
+        }
+      '';
+      settings.sources.providers = {
+        lazydev = {
+          name = "LazyDev";
+          module = "lazydev.integrations.blink";
+          score_offset = 100;
+          enabled = nlua "function() return vim.bo.filetype == 'lua' end";
+        };
+        ripgrep = {
+          name = "Ripgrep";
+          module = "blink-ripgrep";
+          max_items = 3;
+          opts.prefix_min_len = 3;
+        };
+        latex-symbols = {
+          name = "LaTeX";
+          module = "blink-cmp-latex";
+        };
+        buffer = {
+          opts.get_bufnrs = nlua ''
+            function()
+              return vim.api.nvim_buf_line_count(0) < 15000 and vim.api.nvim_list_bufs() or {}
+            end
+          '';
+        };
+      };
+      settings.keymap.preset = "none";
+      settings.keymap."<C-p>" = [
+        "select_prev"
+        "fallback"
+      ];
+      settings.keymap."<C-n>" = [
+        "select_next"
+        "fallback"
+      ];
+      settings.keymap."<C-d>" = [
+        "scroll_documentation_up"
+        "fallback"
+      ];
+      settings.keymap."<C-f>" = [
+        "scroll_documentation_down"
+        "fallback"
+      ];
+      settings.keymap."<C-w>" = [
+        "cancel"
+        "fallback"
+      ];
+      settings.keymap."<Tab>" = [
+        "select_next"
+        "snippet_forward"
+        "fallback"
+      ];
+      settings.keymap."<S-Tab>" = [
+        "select_prev"
+        "snippet_backward"
+        "fallback"
+      ];
+      settings.keymap."<CR>" = [
+        "accept"
+        "fallback"
+      ];
+      settings.completion.ghost_text.enabled = false;
+      settings.completion.list.max_items = 120;
+      settings.completion.menu.border = "single";
+      settings.completion.menu.scrollbar = false;
+    };
+    blink-ripgrep.enable = true;
+    colorful-menu.enable = true;
+    blink-cmp-latex.enable = true; # replaces the vendored symbol data
+    lazydev = {
+      enable = true;
+      lazyLoad.settings.ft = "lua";
+      settings.library = [
+        "lazy.nvim"
+        {
+          path = "luvit-meta/library";
+          words = [ "vim%.uv" ];
+        }
+      ];
+    };
+
+    # None-ls formatters. Each source auto-adds its nixpkgs binary to PATH.
+    none-ls = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "CursorHold"
+        "CursorHoldI"
+      ];
+      sources = {
+        formatting.clang_format = {
+          enable = true;
+          settings.filetypes = [
+            "c"
+            "cpp"
+            "objc"
+            "objcpp"
+            "cs"
+            "cuda"
+            "proto"
+          ];
+        };
+        formatting.prettier = {
+          enable = true;
+          settings.filetypes = [
+            "vue"
+            "typescript"
+            "javascript"
+            "typescriptreact"
+            "javascriptreact"
+            "yaml"
+            "html"
+            "css"
+            "scss"
+            "sh"
+            "markdown"
+          ];
+        };
+        formatting.shfmt.enable = true;
+        formatting.stylua.enable = true;
+        diagnostics.vint.enable = true;
+      };
+    };
+    lsp-format.enable = true; # format-on-save via LSP / none-ls
+    lspconfig.enable = true; # nvim-lspconfig registry (server defaults)
+
+    # nvimdev/lspsaga: LSP UI (code actions, diagnostic flythrough, hover,
+    # rename, call hierarchy). Port of the old lua/modules/configs/completion/
+    # lspsaga.lua, lazy-loaded on LspAttach as before.
+    #
+    # Functional settings are ported verbatim. The icon-glyph fields that
+    # nvimdots pulled from its modules.utils.icons table (ui.kind, ui.imp_sign,
+    # ui.expand, ui.collapse, ui.code_action, ui.actionfix,
+    # symbol_in_winbar.separator) are dropped: web-devicons (enabled above)
+    # supplies the lspkind glyphs lspsaga falls back to.
+    #
+    # Nixvim warns that `implement` wants `symbol_in_winbar` enabled. The old
+    # config deliberately ran implement on with the winbar breadcrumbs off, so
+    # the port keeps that combination and accepts the build warning.
+    #
+    # hover.open_cmd uses the old core.settings external_browser default.
+    lspsaga = {
+      enable = true;
+      lazyLoad.settings.event = "LspAttach";
+      settings = {
+        symbol_in_winbar.enable = true;
+        callhierarchy.layout = "float";
+        callhierarchy.keys = {
+          edit = "e";
+          vsplit = "v";
+          split = "s";
+          tabe = "t";
+          quit = "q";
+          shuttle = "[]";
+          toggle_or_req = "u";
+          close = "<Esc>";
+        };
+        code_action = {
+          num_shortcut = true;
+          only_in_cursor = false;
+          show_server_name = true;
+          extend_gitsigns = false;
+          keys = {
+            quit = "q";
+            exec = "<CR>";
+          };
+        };
+        diagnostic = {
+          show_code_action = true;
+          jump_num_shortcut = true;
+          max_width = 0.5;
+          max_height = 0.6;
+          text_hl_follow = true;
+          border_follow = true;
+          extend_relatedInformation = true;
+          show_layout = "float";
+          show_normal_height = 10;
+          max_show_width = 0.9;
+          max_show_height = 0.6;
+          diagnostic_only_current = false;
+          keys = {
+            exec_action = "r";
+            quit = "q";
+            toggle_or_jump = "<CR>";
+            quit_in_show = [
+              "q"
+              "<Esc>"
+            ];
+          };
+        };
+        hover = {
+          max_width = 0.45;
+          max_height = 0.7;
+          open_link = "gl";
+          open_cmd = "silent ! chrome-cli open";
+        };
+        implement = {
+          enable = true;
+          sign = true;
+          virtual_text = false;
+          priority = 100;
+        };
+        lightbulb = {
+          enable = false;
+          sign = true;
+          virtual_text = false;
+          debounce = 10;
+          sign_priority = 20;
+        };
+        rename = {
+          in_select = false;
+          auto_save = false;
+          project_max_width = 0.5;
+          project_max_height = 0.5;
+          keys = {
+            quit = "<C-c>";
+            exec = "<CR>";
+            select = "x";
+          };
+        };
+        beacon = {
+          enable = true;
+          frequency = 12;
+        };
+        ui = {
+          border = "single";
+          devicon = true;
+          title = true;
+          lines = [
+            "┗"
+            "┣"
+            "┃"
+            "━"
+            "┏"
+          ];
+        };
+        scroll_preview = {
+          scroll_down = "<C-d>";
+          scroll_up = "<C-u>";
+        };
+        request_timeout = 3000;
+      };
+    };
+
+    # ------------------------------------------------------------------
+    # Editor (nvimdots category: editor.lua)
+    # ------------------------------------------------------------------
+    autoclose = {
+      enable = true;
+      lazyLoad.settings.event = "InsertEnter";
+      settings.keys = {
+        " " = {
+          escape = false;
+          close = true;
+          pair = "()";
+        };
+        "[" = {
+          escape = false;
+          close = true;
+          pair = "[]";
+        };
+        "{" = {
+          escape = false;
+          close = true;
+          pair = "{}";
+        };
+        "<" = {
+          escape = true;
+          close = true;
+          pair = "<>";
+          enabled_filetypes = [ "rust" ];
+        };
+        ">" = {
+          escape = true;
+          close = false;
+          pair = "<>";
+        };
+        ")" = {
+          escape = true;
+          close = false;
+          pair = "()";
+        };
+        "]" = {
+          escape = true;
+          close = false;
+          pair = "[]";
+        };
+        "}" = {
+          escape = true;
+          close = false;
+          pair = "{}";
+        };
+        "\"" = {
+          escape = true;
+          close = true;
+          pair = "\"\"";
+        };
+        "`" = {
+          escape = true;
+          close = true;
+          pair = "``";
+        };
+        "'" = {
+          escape = true;
+          close = true;
+          pair = "''";
+          disabled_filetypes = [ "rust" ];
+        };
+      };
+      settings.options.disabled_filetypes = [
+        "alpha"
+        "checkhealth"
+        "diff"
+        "help"
+        "log"
+        "NvimTree"
+        "qf"
+        "TelescopePrompt"
+      ];
+    };
+    faster.enable = true; # eager: defers features on big files
+    bufdelete = {
+      enable = true;
+      lazyLoad.settings.cmd = [
+        "BufDel"
+        "BufDelAll"
+        "BufDelOthers"
+      ];
+    };
+    flash = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "CursorHold"
+        "CursorHoldI"
+      ];
+      settings.labels = "asdfghjklqwertyuiopzxcvbnm";
+      settings.label.uppercase = true;
+      settings.label.current = true;
+      settings.label.distance = true;
+      settings.modes.search.enabled = false;
+      settings.modes.char = {
+        enabled = true;
+        autohide = false;
+        jump_labels = true;
+        multi_line = true;
+        label.exclude = "hjkliardc";
+      };
+    };
+    comment = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "CursorHold"
+        "CursorHoldI"
+      ];
+      settings.ignore = "^$";
+    };
+    mini-cursorword = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "BufReadPost"
+        "BufAdd"
+        "BufNewFile"
+      ];
+      settings.delay = 200;
+    };
+    vim-suda = {
+      enable = true;
+      lazyLoad.settings.cmd = [
+        "SudaRead"
+        "SudaWrite"
+      ];
+    };
+
+    # tpope/vim-sleuth: auto-detects indent/tab options per filetype. Port of
+    # the old editor.lua spec: lazy on BufNewFile/BufReadPost/BufFilePost, no
+    # settings table. The module defaults (heuristics on) already match.
+    sleuth = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "BufNewFile"
+        "BufReadPost"
+        "BufFilePost"
+      ];
+    };
+
+    # Treesitter: install the full Nix grammar set (superset of the old
+    # ensure_installed list). highlight + indent via native APIs.
+    treesitter = {
+      enable = true;
+      highlight.enable = true;
+      indent.enable = true;
+    };
+    treesitter-textobjects = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "BufReadPost"
+        "BufAdd"
+        "BufNewFile"
+      ];
+      settings.select.lookahead = true;
+      settings.select.selection_modes = {
+        "@parameter.outer" = "v";
+        "@function.outer" = "V";
+        "@class.outer" = "<c-v>";
+      };
+      settings.move.set_jumps = true;
+    };
+    treesitter-context = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "BufReadPost"
+        "BufAdd"
+        "BufNewFile"
+      ];
+      settings.enable = true;
+      settings.line_numbers = true;
+      settings.max_lines = 3;
+      settings.multiline_threshold = 20;
+      settings.trim_scope = "outer";
+      settings.mode = "cursor";
+    };
+    vim-matchup = {
+      enable = true;
+      # Port of the old vimscript-plugin globals (matchup_*). The plugin module
+      # prefixes these settings into `globals.matchup_*` automatically.
+      settings.transmute_enabled = 1;
+      settings.surround_enabled = 1;
+      settings.matchparen_offscreen = {
+        method = "popup";
+      };
+    };
+    ts-autotag = {
+      enable = true;
+      lazyLoad.settings.event = "InsertEnter";
+      # No settings: the plugin's defaults (enable_close = true,
+      # enable_rename = true, enable_close_on_slash = false) already match
+      # our requirements. Use `settings.opts.*` if we ever need overrides.
+    };
+    rainbow-delimiters.enable = true;
+
+    # ------------------------------------------------------------------
+    # Lang (nvimdots category: lang.lua)
+    # ------------------------------------------------------------------
+    rustaceanvim = {
+      enable = true;
+      lazyLoad.settings.ft = "rust";
+      settings.dap = {
+        adapter = false;
+        configuration = false;
+        autoload_configurations = false;
+      };
+      settings.server.standalone = true;
+      settings.server.default_settings."rust-analyzer" = {
+        checkOnSave = true;
+        procMacro = {
+          enable = true;
+        };
+        completion = {
+          autoimport = true;
+        };
+        files = {
+          excludeDirs = [ ".direnv" ];
+        };
+      };
+    };
+    crates = {
+      enable = true;
+
+      # Optional settings block configured for inline version hints
+      settings = {
+        smart_insert = true;
+        insert_closing_quote = true;
+
+        # Configure the layout of the virtual text inline hints
+        text = {
+          searching = "  🔍 searching...";
+          version = "  ⭐ %s"; # Shows the latest compatible version
+          prerelease = "  🚧 %s";
+          yanked = "  ❌ %s yanked";
+        };
+
+        popup = {
+          autofocus = true;
+          border = "rounded";
+        };
+      };
+    };
+    render-markdown = {
+      enable = true;
+      lazyLoad.settings.ft = "markdown";
+      settings.enabled = true;
+      settings.max_file_size = 2.0;
+      settings.debounce = 100;
+      settings.render_modes = [
+        "n"
+        "c"
+        "t"
+      ];
+      settings.anti_conceal.enabled = true;
+      settings.log_level = "error";
+    };
+
+    # ------------------------------------------------------------------
+    # Tool (nvimdots category: tool.lua)
+    # ------------------------------------------------------------------
+    fugitive = {
+      enable = true;
+      lazyLoad.settings.cmd = [
+        "Git"
+        "G"
+      ];
+    };
+    nvim-tree = {
+      enable = true;
+      lazyLoad.settings.cmd = [
+        "NvimTreeToggle"
+        "NvimTreeOpen"
+        "NvimTreeFindFile"
+        "NvimTreeFindFileToggle"
+        "NvimTreeRefresh"
+      ];
+      # Port of the NvimTreeAutoClose autocmd from the old core/event.lua:
+      # quit when the tree is the only remaining window in the tab.
+      autoClose = true;
+    };
+    which-key = {
+      enable = true;
+      lazyLoad.settings.event = [
+        "CursorHold"
+        "CursorHoldI"
+      ];
+      settings.preset = "classic";
+      # Which-key v3.x trigger specs use the v2 format: `<auto>` (auto-
+      # generate trigger entries from your keymaps) plus a `mode` field.
+      # The plugin's own default is the positional form
+      # `{ { "<auto>", mode = "nxso" } }`; Nix attrset literals have no
+      # integer keys, so the positional element is written with its named
+      # field instead: `lhs` is a valid v2 spec field and parses to the
+      # same mapping (`mapping.lhs = "<auto>"`). `nixso` = n,i,x,s,o: the
+      # plugin default `nxso` plus insert mode. The old v1 shape
+      # `{ "<auto>" = { mode = "nixso" } }` was rejected with "Invalid
+      # field `<auto>`" in `:checkhealth which-key`.
+      settings.triggers = [
+        {
+          lhs = "<auto>";
+          mode = "nixso";
+        }
+      ];
+      # Port of the old lua/modules/configs/tool/which-key.lua: delay, window
+      # style, expand, the builtin preset plugins, and the prefix group
+      # labels. The old group labels carried nerd-font glyphs from
+      # modules.utils.icons, which this config does not ship. Plain-text
+      # groups keep the same structure. The groups for dropped plugins
+      # (Debug, Session, Search-S, Chat, Package) are not ported.
+      settings.delay = 300; # the old delay was `vim.o.timeoutlen` (300 here)
+      settings.expand = 1;
+      settings.win = {
+        border = "none";
+        padding = [
+          1
+          2
+        ];
+        wo.winblend = 0;
+      };
+      settings.plugins = {
+        marks = true;
+        registers = true;
+        spelling = {
+          enabled = true;
+          suggestions = 20;
+        };
+        presets = {
+          motions = false;
+          operators = false;
+          text_objects = true;
+          windows = true;
+          nav = true;
+          z = true;
+          g = true;
+        };
+      };
+      settings.spec = [
+        {
+          __unkeyed-1 = "<leader>g";
+          group = "Git";
+        }
+        {
+          __unkeyed-1 = "<leader>b";
+          group = "Buffer";
+        }
+        {
+          __unkeyed-1 = "<leader>W";
+          group = "Window";
+        }
+        {
+          __unkeyed-1 = "<leader>l";
+          group = "Lsp";
+        }
+        {
+          __unkeyed-1 = "<leader>f";
+          group = "Fuzzy Find";
+        }
+        {
+          __unkeyed-1 = "<leader>n";
+          group = "Nvim Tree";
+        }
+      ];
+    };
+    web-devicons.enable = true;
+    # DECISION (2026-10): this plugin used to lazy-load on its `cmd`
+    # trigger (`lazyLoad.settings.cmd = "Telescope"`). In this nixvim pin,
+    # the built pack dir places telescope.nvim in `start/` anyway (the
+    # plugin files load at startup), so its own `:Telescope` command
+    # outlives the lz-n trigger registration and the generated
+    # `telescope.setup()` after-hook never ran on the normal
+    # `<leader>ff` / `:Telescope` flows. That left every setting below
+    # (vimgrep args, layout, extensions, and the `<C-y>` yank map) as
+    # dead code. Making the plugin eager moves the generated setup
+    # (setup call + `load_extension` loop) into the startup lua config,
+    # so the settings apply before any picker opens. The plugin files
+    # were already loading eagerly, so this adds no startup work.
+    # Revert by restoring `lazyLoad.settings.cmd = "Telescope";`.
+    telescope = {
+      enable = true;
+      settings.defaults.vimgrep_arguments = [
+        "rg"
+        "--no-heading"
+        "--with-filename"
+        "--line-number"
+        "--column"
+        "--smart-case"
+      ];
+      settings.defaults.initial_mode = "insert";
+      settings.defaults.scroll_strategy = "limit";
+      settings.defaults.color_devicons = true;
+      settings.defaults.layout_config.width = 0.85;
+      settings.defaults.layout_config.height = 0.92;
+      # Yank the filepath of the highlighted entry to the system clipboard.
+      # `<C-y>` in both prompt modes: insert (the default, initial_mode =
+      # "insert" above) and normal (entered with `<Esc>`; the picker's
+      # normal-mode `<Esc>` then closes). `<C-y>` is free in this telescope
+      # version: its default i/n mappings do not bind it. The map sits in
+      # `defaults.mappings`, so it reaches every picker.
+      settings.defaults.mappings = {
+        i = {
+          "<C-y>" = yankPath;
+        };
+        n = {
+          "<C-y>" = yankPath;
+        };
+      };
+      extensions = {
+        # Port of the old lua/modules/configs/tool/telescope.lua extension opts.
+        frecency = {
+          enable = true;
+          settings.show_scores = true;
+          settings.show_unindexed = true;
+          settings.ignore_patterns = [
+            "*.git/*"
+            "*/tmp/*"
+          ];
+        };
+        # Port of the old live_grep_args extension, including the two prompt-mode
+        # keybinds. The map values are Lua functions built at runtime, so the
+        # whole `mappings` table is raw Lua.
+        live-grep-args = {
+          enable = true;
+          settings.auto_quoting = true;
+          # The old keybinds. `quote_prompt` builds the key handler at setup
+          # time, so the value must be a Lua expression, not a statement.
+          # `require` is cached, so the two calls are cheap.
+          settings.mappings = nlua ''
+            {
+              i = {
+                ["<C-k>"] = require("telescope-live-grep-args.actions").quote_prompt(),
+                ["<C-i>"] = require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " }),
+              },
+            }
+          '';
+        };
+        fzf-native.enable = false; # dropped per plugin-selection.md
+      };
+    };
+    # ------------------------------------------------------------------
+    # UI (nvimdots category: ui.lua)
+    # ------------------------------------------------------------------
     alpha = {
       enable = true;
       lazyLoad.settings.event = "BufWinEnter";
@@ -414,703 +1162,6 @@ in
       settings.ignored_filetypes = [ "NvimTree" ];
     };
 
-    # ------------------------------------------------------------------
-    # Editing
-    # ------------------------------------------------------------------
-    autoclose = {
-      enable = true;
-      lazyLoad.settings.event = "InsertEnter";
-      settings.keys = {
-        " " = {
-          escape = false;
-          close = true;
-          pair = "()";
-        };
-        "[" = {
-          escape = false;
-          close = true;
-          pair = "[]";
-        };
-        "{" = {
-          escape = false;
-          close = true;
-          pair = "{}";
-        };
-        "<" = {
-          escape = true;
-          close = true;
-          pair = "<>";
-          enabled_filetypes = [ "rust" ];
-        };
-        ">" = {
-          escape = true;
-          close = false;
-          pair = "<>";
-        };
-        ")" = {
-          escape = true;
-          close = false;
-          pair = "()";
-        };
-        "]" = {
-          escape = true;
-          close = false;
-          pair = "[]";
-        };
-        "}" = {
-          escape = true;
-          close = false;
-          pair = "{}";
-        };
-        "\"" = {
-          escape = true;
-          close = true;
-          pair = "\"\"";
-        };
-        "`" = {
-          escape = true;
-          close = true;
-          pair = "``";
-        };
-        "'" = {
-          escape = true;
-          close = true;
-          pair = "''";
-          disabled_filetypes = [ "rust" ];
-        };
-      };
-      settings.options.disabled_filetypes = [
-        "alpha"
-        "checkhealth"
-        "diff"
-        "help"
-        "log"
-        "NvimTree"
-        "qf"
-        "TelescopePrompt"
-      ];
-    };
-    faster.enable = true; # eager: defers features on big files
-    bufdelete = {
-      enable = true;
-      lazyLoad.settings.cmd = [
-        "BufDel"
-        "BufDelAll"
-        "BufDelOthers"
-      ];
-    };
-    flash = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "CursorHold"
-        "CursorHoldI"
-      ];
-      settings.labels = "asdfghjklqwertyuiopzxcvbnm";
-      settings.label.uppercase = true;
-      settings.label.current = true;
-      settings.label.distance = true;
-      settings.modes.search.enabled = false;
-      settings.modes.char = {
-        enabled = true;
-        autohide = false;
-        jump_labels = true;
-        multi_line = true;
-        label.exclude = "hjkliardc";
-      };
-    };
-    comment = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "CursorHold"
-        "CursorHoldI"
-      ];
-      settings.ignore = "^$";
-    };
-    mini-cursorword = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "BufReadPost"
-        "BufAdd"
-        "BufNewFile"
-      ];
-      settings.delay = 200;
-    };
-    vim-suda = {
-      enable = true;
-      lazyLoad.settings.cmd = [
-        "SudaRead"
-        "SudaWrite"
-      ];
-    };
-
-    # tpope/vim-sleuth: auto-detects indent/tab options per filetype. Port of
-    # the old editor.lua spec: lazy on BufNewFile/BufReadPost/BufFilePost, no
-    # settings table. The module defaults (heuristics on) already match.
-    sleuth = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "BufNewFile"
-        "BufReadPost"
-        "BufFilePost"
-      ];
-    };
-
-    # Treesitter: install the full Nix grammar set (superset of the old
-    # ensure_installed list). highlight + indent via native APIs.
-    treesitter = {
-      enable = true;
-      highlight.enable = true;
-      indent.enable = true;
-    };
-    treesitter-textobjects = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "BufReadPost"
-        "BufAdd"
-        "BufNewFile"
-      ];
-      settings.select.lookahead = true;
-      settings.select.selection_modes = {
-        "@parameter.outer" = "v";
-        "@function.outer" = "V";
-        "@class.outer" = "<c-v>";
-      };
-      settings.move.set_jumps = true;
-    };
-    treesitter-context = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "BufReadPost"
-        "BufAdd"
-        "BufNewFile"
-      ];
-      settings.enable = true;
-      settings.line_numbers = true;
-      settings.max_lines = 3;
-      settings.multiline_threshold = 20;
-      settings.trim_scope = "outer";
-      settings.mode = "cursor";
-    };
-    vim-matchup = {
-      enable = true;
-      # Port of the old vimscript-plugin globals (matchup_*). The plugin module
-      # prefixes these settings into `globals.matchup_*` automatically.
-      settings.transmute_enabled = 1;
-      settings.surround_enabled = 1;
-      settings.matchparen_offscreen = {
-        method = "popup";
-      };
-    };
-    ts-autotag = {
-      enable = true;
-      lazyLoad.settings.event = "InsertEnter";
-      # No settings: the plugin's defaults (enable_close = true,
-      # enable_rename = true, enable_close_on_slash = false) already match
-      # our requirements. Use `settings.opts.*` if we ever need overrides.
-    };
-    rainbow-delimiters.enable = true;
-
-    # ------------------------------------------------------------------
-    # Completion
-    # ------------------------------------------------------------------
-    blink-cmp = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "BufReadPost"
-        "InsertEnter"
-        "CmdlineEnter"
-      ];
-      settings.snippets.preset = "default";
-      settings.term.enabled = false;
-      settings.appearance.nerd_font_variant = "normal";
-      settings.fuzzy.implementation = "prefer_rust_with_warning";
-      settings.cmdline.enabled = true;
-      settings.cmdline.sources = nlua ''
-        function()
-          local t = vim.fn.getcmdtype()
-          if t == '/' or t == '?' then return { 'buffer' } end
-          if t == ':' or t == '@' then return { 'cmdline', 'path' } end
-          return {}
-        end
-      '';
-      settings.sources.default = [
-        "lsp"
-        "snippets"
-        "path"
-        "buffer"
-        "ripgrep"
-        "latex-symbols"
-      ];
-      # lazydev is a per-filetype source, not a global default. Its module
-      # (lazydev.integrations.blink) only lands on package.path once lazydev.nvim
-      # is loaded (ft = "lua"). blink requires the module for every provider in
-      # `sources.default` on InsertEnter, so a global lazydev entry would crash
-      # on any non-lua buffer. Registering it for the lua filetype only keeps the
-      # completion available there while leaving other buffers crash-free.
-      settings.sources.per_filetype = nlua ''
-        {
-          lua = { "lazydev", inherit_defaults = true },
-        }
-      '';
-      settings.sources.providers = {
-        lazydev = {
-          name = "LazyDev";
-          module = "lazydev.integrations.blink";
-          score_offset = 100;
-          enabled = nlua "function() return vim.bo.filetype == 'lua' end";
-        };
-        ripgrep = {
-          name = "Ripgrep";
-          module = "blink-ripgrep";
-          max_items = 3;
-          opts.prefix_min_len = 3;
-        };
-        latex-symbols = {
-          name = "LaTeX";
-          module = "blink-cmp-latex";
-        };
-        buffer = {
-          opts.get_bufnrs = nlua ''
-            function()
-              return vim.api.nvim_buf_line_count(0) < 15000 and vim.api.nvim_list_bufs() or {}
-            end
-          '';
-        };
-      };
-      settings.keymap.preset = "none";
-      settings.keymap."<C-p>" = [
-        "select_prev"
-        "fallback"
-      ];
-      settings.keymap."<C-n>" = [
-        "select_next"
-        "fallback"
-      ];
-      settings.keymap."<C-d>" = [
-        "scroll_documentation_up"
-        "fallback"
-      ];
-      settings.keymap."<C-f>" = [
-        "scroll_documentation_down"
-        "fallback"
-      ];
-      settings.keymap."<C-w>" = [
-        "cancel"
-        "fallback"
-      ];
-      settings.keymap."<Tab>" = [
-        "select_next"
-        "snippet_forward"
-        "fallback"
-      ];
-      settings.keymap."<S-Tab>" = [
-        "select_prev"
-        "snippet_backward"
-        "fallback"
-      ];
-      settings.keymap."<CR>" = [
-        "accept"
-        "fallback"
-      ];
-      settings.completion.ghost_text.enabled = false;
-      settings.completion.list.max_items = 120;
-      settings.completion.menu.border = "single";
-      settings.completion.menu.scrollbar = false;
-    };
-    blink-ripgrep.enable = true;
-    colorful-menu.enable = true;
-    blink-cmp-latex.enable = true; # replaces the vendored symbol data
-    lazydev = {
-      enable = true;
-      lazyLoad.settings.ft = "lua";
-      settings.library = [
-        "lazy.nvim"
-        {
-          path = "luvit-meta/library";
-          words = [ "vim%.uv" ];
-        }
-      ];
-    };
-
-    # None-ls formatters. Each source auto-adds its nixpkgs binary to PATH.
-    none-ls = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "CursorHold"
-        "CursorHoldI"
-      ];
-      sources = {
-        formatting.clang_format = {
-          enable = true;
-          settings.filetypes = [
-            "c"
-            "cpp"
-            "objc"
-            "objcpp"
-            "cs"
-            "cuda"
-            "proto"
-          ];
-        };
-        formatting.prettier = {
-          enable = true;
-          settings.filetypes = [
-            "vue"
-            "typescript"
-            "javascript"
-            "typescriptreact"
-            "javascriptreact"
-            "yaml"
-            "html"
-            "css"
-            "scss"
-            "sh"
-            "markdown"
-          ];
-        };
-        formatting.shfmt.enable = true;
-        formatting.stylua.enable = true;
-        diagnostics.vint.enable = true;
-      };
-    };
-    lsp-format.enable = true; # format-on-save via LSP / none-ls
-    lspconfig.enable = true; # nvim-lspconfig registry (server defaults)
-
-    # nvimdev/lspsaga: LSP UI (code actions, diagnostic flythrough, hover,
-    # rename, call hierarchy). Port of the old lua/modules/configs/completion/
-    # lspsaga.lua, lazy-loaded on LspAttach as before.
-    #
-    # Functional settings are ported verbatim. The icon-glyph fields that
-    # nvimdots pulled from its modules.utils.icons table (ui.kind, ui.imp_sign,
-    # ui.expand, ui.collapse, ui.code_action, ui.actionfix,
-    # symbol_in_winbar.separator) are dropped: web-devicons (enabled above)
-    # supplies the lspkind glyphs lspsaga falls back to.
-    #
-    # Nixvim warns that `implement` wants `symbol_in_winbar` enabled. The old
-    # config deliberately ran implement on with the winbar breadcrumbs off, so
-    # the port keeps that combination and accepts the build warning.
-    #
-    # hover.open_cmd uses the old core.settings external_browser default.
-    lspsaga = {
-      enable = true;
-      lazyLoad.settings.event = "LspAttach";
-      settings = {
-        symbol_in_winbar.enable = true;
-        callhierarchy.layout = "float";
-        callhierarchy.keys = {
-          edit = "e";
-          vsplit = "v";
-          split = "s";
-          tabe = "t";
-          quit = "q";
-          shuttle = "[]";
-          toggle_or_req = "u";
-          close = "<Esc>";
-        };
-        code_action = {
-          num_shortcut = true;
-          only_in_cursor = false;
-          show_server_name = true;
-          extend_gitsigns = false;
-          keys = {
-            quit = "q";
-            exec = "<CR>";
-          };
-        };
-        diagnostic = {
-          show_code_action = true;
-          jump_num_shortcut = true;
-          max_width = 0.5;
-          max_height = 0.6;
-          text_hl_follow = true;
-          border_follow = true;
-          extend_relatedInformation = true;
-          show_layout = "float";
-          show_normal_height = 10;
-          max_show_width = 0.9;
-          max_show_height = 0.6;
-          diagnostic_only_current = false;
-          keys = {
-            exec_action = "r";
-            quit = "q";
-            toggle_or_jump = "<CR>";
-            quit_in_show = [
-              "q"
-              "<Esc>"
-            ];
-          };
-        };
-        hover = {
-          max_width = 0.45;
-          max_height = 0.7;
-          open_link = "gl";
-          open_cmd = "silent ! chrome-cli open";
-        };
-        implement = {
-          enable = true;
-          sign = true;
-          virtual_text = false;
-          priority = 100;
-        };
-        lightbulb = {
-          enable = false;
-          sign = true;
-          virtual_text = false;
-          debounce = 10;
-          sign_priority = 20;
-        };
-        rename = {
-          in_select = false;
-          auto_save = false;
-          project_max_width = 0.5;
-          project_max_height = 0.5;
-          keys = {
-            quit = "<C-c>";
-            exec = "<CR>";
-            select = "x";
-          };
-        };
-        beacon = {
-          enable = true;
-          frequency = 12;
-        };
-        ui = {
-          border = "single";
-          devicon = true;
-          title = true;
-          lines = [
-            "┗"
-            "┣"
-            "┃"
-            "━"
-            "┏"
-          ];
-        };
-        scroll_preview = {
-          scroll_down = "<C-d>";
-          scroll_up = "<C-u>";
-        };
-        request_timeout = 3000;
-      };
-    };
-
-    # ------------------------------------------------------------------
-    # Language packs
-    # ------------------------------------------------------------------
-    rustaceanvim = {
-      enable = true;
-      lazyLoad.settings.ft = "rust";
-      settings.dap = {
-        adapter = false;
-        configuration = false;
-        autoload_configurations = false;
-      };
-      settings.server.standalone = true;
-      settings.server.default_settings."rust-analyzer" = {
-        checkOnSave = true;
-        procMacro = {
-          enable = true;
-        };
-        completion = {
-          autoimport = true;
-        };
-        files = {
-          excludeDirs = [ ".direnv" ];
-        };
-      };
-    };
-    crates = {
-      enable = true;
-
-      # Optional settings block configured for inline version hints
-      settings = {
-        smart_insert = true;
-        insert_closing_quote = true;
-
-        # Configure the layout of the virtual text inline hints
-        text = {
-          searching = "  🔍 searching...";
-          version = "  ⭐ %s"; # Shows the latest compatible version
-          prerelease = "  🚧 %s";
-          yanked = "  ❌ %s yanked";
-        };
-
-        popup = {
-          autofocus = true;
-          border = "rounded";
-        };
-      };
-    };
-    render-markdown = {
-      enable = true;
-      lazyLoad.settings.ft = "markdown";
-      settings.enabled = true;
-      settings.max_file_size = 2.0;
-      settings.debounce = 100;
-      settings.render_modes = [
-        "n"
-        "c"
-        "t"
-      ];
-      settings.anti_conceal.enabled = true;
-      settings.log_level = "error";
-    };
-
-    # ------------------------------------------------------------------
-    # Tooling
-    # ------------------------------------------------------------------
-    fugitive = {
-      enable = true;
-      lazyLoad.settings.cmd = [
-        "Git"
-        "G"
-      ];
-    };
-    nvim-tree = {
-      enable = true;
-      lazyLoad.settings.cmd = [
-        "NvimTreeToggle"
-        "NvimTreeOpen"
-        "NvimTreeFindFile"
-        "NvimTreeFindFileToggle"
-        "NvimTreeRefresh"
-      ];
-      # Port of the NvimTreeAutoClose autocmd from the old core/event.lua:
-      # quit when the tree is the only remaining window in the tab.
-      autoClose = true;
-    };
-    which-key = {
-      enable = true;
-      lazyLoad.settings.event = [
-        "CursorHold"
-        "CursorHoldI"
-      ];
-      settings.preset = "classic";
-      # Which-key v3.x trigger specs use the v2 format: `<auto>` (auto-
-      # generate trigger entries from your keymaps) plus a `mode` field.
-      # The plugin's own default is the positional form
-      # `{ { "<auto>", mode = "nxso" } }`; Nix attrset literals have no
-      # integer keys, so the positional element is written with its named
-      # field instead: `lhs` is a valid v2 spec field and parses to the
-      # same mapping (`mapping.lhs = "<auto>"`). `nixso` = n,i,x,s,o: the
-      # plugin default `nxso` plus insert mode. The old v1 shape
-      # `{ "<auto>" = { mode = "nixso" } }` was rejected with "Invalid
-      # field `<auto>`" in `:checkhealth which-key`.
-      settings.triggers = [
-        {
-          lhs = "<auto>";
-          mode = "nixso";
-        }
-      ];
-      # Port of the old lua/modules/configs/tool/which-key.lua: delay, window
-      # style, expand, the builtin preset plugins, and the prefix group
-      # labels. The old group labels carried nerd-font glyphs from
-      # modules.utils.icons, which this config does not ship. Plain-text
-      # groups keep the same structure. The groups for dropped plugins
-      # (Debug, Session, Search-S, Chat, Package) are not ported.
-      settings.delay = 300; # the old delay was `vim.o.timeoutlen` (300 here)
-      settings.expand = 1;
-      settings.win = {
-        border = "none";
-        padding = [
-          1
-          2
-        ];
-        wo.winblend = 0;
-      };
-      settings.plugins = {
-        marks = true;
-        registers = true;
-        spelling = {
-          enabled = true;
-          suggestions = 20;
-        };
-        presets = {
-          motions = false;
-          operators = false;
-          text_objects = true;
-          windows = true;
-          nav = true;
-          z = true;
-          g = true;
-        };
-      };
-      settings.spec = [
-        {
-          __unkeyed-1 = "<leader>g";
-          group = "Git";
-        }
-        {
-          __unkeyed-1 = "<leader>b";
-          group = "Buffer";
-        }
-        {
-          __unkeyed-1 = "<leader>W";
-          group = "Window";
-        }
-        {
-          __unkeyed-1 = "<leader>l";
-          group = "Lsp";
-        }
-        {
-          __unkeyed-1 = "<leader>f";
-          group = "Fuzzy Find";
-        }
-        {
-          __unkeyed-1 = "<leader>n";
-          group = "Nvim Tree";
-        }
-      ];
-    };
-    web-devicons.enable = true;
-    telescope = {
-      enable = true;
-      lazyLoad.settings.cmd = "Telescope";
-      settings.defaults.vimgrep_arguments = [
-        "rg"
-        "--no-heading"
-        "--with-filename"
-        "--line-number"
-        "--column"
-        "--smart-case"
-      ];
-      settings.defaults.initial_mode = "insert";
-      settings.defaults.scroll_strategy = "limit";
-      settings.defaults.color_devicons = true;
-      settings.defaults.layout_config.width = 0.85;
-      settings.defaults.layout_config.height = 0.92;
-      extensions = {
-        # Port of the old lua/modules/configs/tool/telescope.lua extension opts.
-        frecency = {
-          enable = true;
-          settings.show_scores = true;
-          settings.show_unindexed = true;
-          settings.ignore_patterns = [
-            "*.git/*"
-            "*/tmp/*"
-          ];
-        };
-        # Port of the old live_grep_args extension, including the two prompt-mode
-        # keybinds. The map values are Lua functions built at runtime, so the
-        # whole `mappings` table is raw Lua.
-        live-grep-args = {
-          enable = true;
-          settings.auto_quoting = true;
-          # The old keybinds. `quote_prompt` builds the key handler at setup
-          # time, so the value must be a Lua expression, not a statement.
-          # `require` is cached, so the two calls are cheap.
-          settings.mappings = nlua ''
-            {
-              i = {
-                ["<C-k>"] = require("telescope-live-grep-args.actions").quote_prompt(),
-                ["<C-i>"] = require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " }),
-              },
-            }
-          '';
-        };
-        fzf-native.enable = false; # dropped per plugin-selection.md
-      };
-    };
   };
 
   # ------------------------------------------------------------------
