@@ -11,8 +11,13 @@ let
 
   # Telescope picker action: yank the filepath of the highlighted entry to
   # the `"` register (the system clipboard, routed via unnamedplus; see
-  # default.nix). Bound to `<C-y>` in the telescope block below. `filename`
-  # is set on grep entries; `value` holds the path on file-picker entries.
+  # default.nix) and, when nvim runs inside tmux, into the tmux paste
+  # buffer (`prefix ]`). The tmux write covers the headless/SSH workflow:
+  # with no Wayland or X11 session, `wl-copy` cannot connect and the
+  # system-clipboard write lands nowhere, but `tmux load-buffer` still
+  # fills the tmux buffer. Bound to `<C-y>` in the telescope block below.
+  # `filename` is set on grep entries; `value` holds the path on
+  # file-picker entries.
   yankPath = nlua ''
     function(prompt_bufnr)
       local state = require("telescope.actions.state")
@@ -25,6 +30,9 @@ let
         local path = entry.filename or entry.value
         if type(path) == "string" and path ~= "" then
           vim.fn.setreg('"', path)
+          if vim.env.TMUX ~= nil and vim.fn.executable("tmux") == 1 then
+            vim.fn.system({ "tmux", "load-buffer", "-" }, path)
+          end
           vim.notify("Yanked: " .. path)
         end
       end

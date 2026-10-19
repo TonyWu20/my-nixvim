@@ -139,8 +139,11 @@ the blink-ripgrep source.
 - **Picker-internal keymaps**: keymaps that only work inside a telescope
   prompt live in `plugins.telescope.settings.defaults.mappings`, not in
   `keymaps.nix`. The `yankPath` raw-Lua action (let block in `plugins.nix`)
-  yanks the highlighted entry's filepath to the clipboard on `<C-y>` in both
-  prompt modes.
+  yanks the highlighted entry's filepath on `<C-y>` in both prompt modes.
+  It writes the `"` register (system clipboard via `unnamedplus`) and, when
+  nvim runs inside tmux, also loads the tmux paste buffer so `prefix ]`
+  works in the headless/SSH workflow where `wl-copy` has no Wayland
+  session to connect to.
 - **Telescope loads eagerly** (no `lazyLoad` on the telescope block in
   `plugins.nix`): in this nixvim pin the built pack dir puts telescope.nvim
   in `start/` either way, and its own `:Telescope` command would then beat
