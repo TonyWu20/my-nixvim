@@ -11,11 +11,14 @@ config can be validated without a full home-manager evaluation.
 flake.nix              Flake entry point: inputs and outputs
 flake.lock             Pinned inputs (nixpkgs, nixvim, home-manager)
 nixvim-config/
-  default.nix          Module root: imports, colorscheme, globals, runtime packages
+  default.nix          Module root: imports, globals, runtime packages
   options.nix          vim.opt.* table
   keymaps.nix          Global keymaps
-  plugins.nix          Plugins grouped by nvimdots category (completion,
-                             editor, lang, tool, ui), LSP servers, formatters
+  plugins/             One .nix file per plugin, grouped in the five
+                       nvimdots category directories (completion, editor,
+                       lang, tool, ui). default.nix aggregates the tree
+                       and holds the leftovers: catppuccin, lsp.servers,
+                       lsp.keymaps, extraPlugins.
   extra-lua.nix        pcall-guarded setup() for plugins with no nixvim module
 nixvim-rewrite.md      Migration record: old init.lua/lazy.nvim -> nixvim
 plugin-selection.md    Why each plugin was kept or dropped
@@ -49,7 +52,7 @@ Anything nixvim declares as an option can be set in any of them.
 
 **1. A plugin with a nixvim module (the common case).**
 
-Enable it in `nixvim-config/plugins.nix`:
+Enable it in `nixvim-config/plugins/<category>/<plugin>.nix`:
 
 ```nix
 plugins.<name>.enable = true;
@@ -84,7 +87,7 @@ let nlua = lib.nixvim.mkRaw; in
 
 There is no module to enable. Instead:
 
-- If nixpkgs ships it, add the package to `extraPlugins` in `plugins.nix`:
+- If nixpkgs ships it, add the package to `extraPlugins` in `plugins/default.nix`:
   `pkgs.vimPlugins.<name>` (see smartyank-nvim, mini-surround,
   focus-nvim, lean-nvim).
 - If nixpkgs does not ship it, build it from pinned source in
@@ -113,7 +116,7 @@ lsp.servers.<name>.enable = true;
 
 For a server with a non-standard command, extend with
 `lsp.servers.<name>.config.cmd` and `filetypes` (see harper_ls and
-nushell in `plugins.nix`). LSP-attach keymaps live in `lsp.keymaps`,
+nushell in `plugins/default.nix`). LSP-attach keymaps live in `lsp.keymaps`,
 registered on `LspAttach` with `lspBufAction` or raw-Lua `action` entries.
 
 **4. Formatters.** Wired through `plugins.none-ls.sources`, each source
@@ -138,14 +141,14 @@ the blink-ripgrep source.
   (`":w<CR>"`) or raw-Lua functions via `nlua`.
 - **Picker-internal keymaps**: keymaps that only work inside a telescope
   prompt live in `plugins.telescope.settings.defaults.mappings`, not in
-  `keymaps.nix`. The `yankPath` raw-Lua action (let block in `plugins.nix`)
+  `keymaps.nix`. The `yankPath` raw-Lua action (let block in `plugins/tool/telescope.nix`)
   yanks the highlighted entry's filepath on `<C-y>` in both prompt modes.
   It writes the `"` register (system clipboard via `unnamedplus`) and, when
   nvim runs inside tmux, also loads the tmux paste buffer so `prefix ]`
   works in the headless/SSH workflow where `wl-copy` has no Wayland
   session to connect to.
 - **Telescope loads eagerly** (no `lazyLoad` on the telescope block in
-  `plugins.nix`): in this nixvim pin the built pack dir puts telescope.nvim
+  `plugins/tool/telescope.nix`): in this nixvim pin the built pack dir puts telescope.nvim
   in `start/` either way, and its own `:Telescope` command would then beat
   the lz-n trigger, leaving the generated `telescope.setup()` (and every
   setting above) unapplied. Eager loading moves the setup call into the
@@ -158,7 +161,7 @@ the blink-ripgrep source.
 - **Bespoke Lua that no module can express**: `extraConfigLuaPost` in
   `extra-lua.nix`. It is a single string, so all blocks concatenate into
   one literal and section headers must use Lua `--` comments, not Nix `#`.
-- **Colorscheme**: `colorschemes.catppuccin` in `plugins.nix`, with
+- **Colorscheme**: `colorschemes.catppuccin` in `plugins/default.nix`, with
   `settings.flavour`, UI `integrations`, and `custom_highlights` (a
   raw-Lua function receiving the palette).
 - **Node-based servers** (prettier, ts_ls family): `withNodeJs = true` in
@@ -209,7 +212,7 @@ the nvim wrapper is exposed as the default editor.
 - **Inputs** (nixvim, nixpkgs, home-manager): `nix flake update`, then
   `nix build` to validate against the new pins.
 - **Pinned-source plugins**: bump the `rev` and `sha256` in their
-  `buildVimPlugin` block in `plugins.nix`.
+  `buildVimPlugin` block in `plugins/<category>/<plugin>.nix`.
 - **Decision docs**: `plugin-selection.md` and
   `fuzzy-finder-comparison.md` record why plugins were kept or dropped.
   Update them when the plugin set changes.

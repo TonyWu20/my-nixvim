@@ -6,7 +6,7 @@
   imports = [
     ./options.nix
     ./keymaps.nix
-    ./plugins.nix
+    ./plugins
     ./extra-lua.nix
   ];
 
@@ -36,7 +36,7 @@
   # leader keys and the suda prompt. The vim-matchup globals are NOT set here.
   # The vim-matchup plugin module exposes them as typed settings and auto
   # prefixes them into `globals.matchup_*`, so they are configured on
-  # `plugins.vim-matchup.settings` (see plugins.nix). Setting the freeform
+  # `plugins.vim-matchup.settings` (see plugins/editor/vim-matchup.nix). Setting the freeform
   # `globals.matchup_*` here collides with those typed options.
   globals = {
     mapleader = " ";

@@ -1,7 +1,7 @@
 # Global keymaps. Faithful port of the old nvimdots `lua/keymap/` files:
 #   editor.lua     -> builtins + editor plugin maps
 #   completion.lua -> formatter maps (the LSP-attach maps live in
-#                    `lsp.keymaps` in plugins.nix. The gitsigns buffer maps
+#                    `lsp.keymaps` in plugins/default.nix. The gitsigns buffer maps
 #                    live in `plugins.gitsigns.settings.on_attach`)
 #   lang.lua       -> render-markdown
 #   tool.lua       -> fugitive, nvim-tree, telescope
@@ -129,7 +129,7 @@ in
 
     # ---- smart-splits: directional split management (old keymap/ui.lua) ----
     # The `:Smart*` user commands are registered by the plugin's own plugin
-    # file on load. lz-n's `cmd` triggers (see plugins.nix) make them work
+    # file on load. lz-n's `cmd` triggers (see the plugins/ tree) make them work
     # even before the first CursorHold fires.
     { key = "<A-h>"; mode = "n"; action = ":SmartResizeLeft<CR>"; options.desc = "window: Resize -3 horizontally"; options.silent = true; }
     { key = "<A-j>"; mode = "n"; action = ":SmartResizeDown<CR>"; options.desc = "window: Resize -3 vertically"; options.silent = true; }

@@ -5,7 +5,7 @@
 #
 # `extraConfigLuaPre` content lands early in the generated init, ahead of
 # the dashboard draw. It captures the monotonic start-time baseline that
-# the alpha footer timer (plugins.nix) renders as "in Mms". No-arg
+# the alpha footer timer (plugins/ui/alpha.nix) renders as "in Mms". No-arg
 # `reltime()` is boot-relative, so the baseline must be captured
 # explicitly.
 #
@@ -14,7 +14,7 @@
 # headers use Lua `--` comments, not Nix `#`.
 {
   extraConfigLuaPre = ''
-    -- Startup timer baseline for the alpha footer (plugins.nix): the
+    -- Startup timer baseline for the alpha footer (plugins/ui/alpha.nix): the
     -- monotonic nanoseconds since process start. No-arg `reltime()` is
     -- boot-relative, so the baseline must be captured explicitly.
     vim.g.nixvim_start_ns = (vim.uv or vim.loop).hrtime()

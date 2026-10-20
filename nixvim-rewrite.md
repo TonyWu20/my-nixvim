@@ -308,7 +308,7 @@ baseline.
   The block lands in the generated init ahead of the extra-config
   plugin setup and the dashboard draw. The baseline is therefore the
   early-init point, close to process start.
-- Footer render: the footer function in `plugins.nix` computes the
+- Footer render: the footer function in `plugins/ui/alpha.nix` computes the
   delta to `hrtime()` in ms. It rounds to 0.01ms and freezes the
   value in `vim.g.nixvim_alpha_start_ms` on first render. Later
   dashboard redraws reuse the frozen value. That matches the old fixed
